@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { MealCalendar } from "@/components/MealCalendar";
 import { ShoppingList } from "@/components/ShoppingList";
+import { InitialScreen } from "@/components/InitialScreen";
 
 interface MealData {
   [key: string]: {
@@ -11,8 +12,65 @@ interface MealData {
   };
 }
 
+const SAMPLE_DISHES = {
+  breakfast: [
+    { name: "Tostadas con Palta", time: "10 min", servings: 2 },
+    { name: "Huevos Revueltos", time: "15 min", servings: 2 },
+    { name: "Pancakes", time: "20 min", servings: 4 },
+    { name: "Avena con Frutas", time: "5 min", servings: 2 },
+    { name: "Yogurt con Granola", time: "5 min", servings: 1 },
+  ],
+  lunch: [
+    { name: "Pollo al Horno con Papas", time: "45 min", servings: 4 },
+    { name: "Pasta con Salsa de Tomate", time: "25 min", servings: 4 },
+    { name: "Ensalada César", time: "15 min", servings: 2 },
+    { name: "Arroz con Verduras", time: "30 min", servings: 4 },
+    { name: "Sándwich de Atún", time: "10 min", servings: 2 },
+    { name: "Sopa de Lentejas", time: "40 min", servings: 6 },
+  ],
+  dinner: [
+    { name: "Salmón a la Plancha", time: "20 min", servings: 2 },
+    { name: "Pizza Casera", time: "35 min", servings: 4 },
+    { name: "Ensalada de Quinoa", time: "15 min", servings: 3 },
+    { name: "Tacos de Pollo", time: "25 min", servings: 4 },
+    { name: "Sopa de Verduras", time: "30 min", servings: 4 },
+    { name: "Milanesas con Puré", time: "35 min", servings: 4 },
+  ]
+};
+
+const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+const generateRandomMeals = (): MealData => {
+  const randomMeals: MealData = {};
+  
+  DAYS.forEach(day => {
+    randomMeals[day] = {};
+    Object.keys(SAMPLE_DISHES).forEach(mealKey => {
+      const mealType = mealKey as keyof typeof SAMPLE_DISHES;
+      const dishes = SAMPLE_DISHES[mealType];
+      const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
+      randomMeals[day][mealType] = randomDish.name;
+    });
+  });
+
+  return randomMeals;
+};
+
 const Index = () => {
   const [selectedMeals, setSelectedMeals] = useState<MealData>({});
+  const [currentMode, setCurrentMode] = useState<'initial' | 'app'>('initial');
+
+  const handleModeSelect = (mode: 'manual' | 'random') => {
+    if (mode === 'random') {
+      const randomMeals = generateRandomMeals();
+      setSelectedMeals(randomMeals);
+    }
+    setCurrentMode('app');
+  };
+
+  if (currentMode === 'initial') {
+    return <InitialScreen onSelectMode={handleModeSelect} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,7 +88,7 @@ const Index = () => {
                 Selecciona qué preparar cada día de la semana
               </p>
             </div>
-            <MealCalendar onMealsChange={setSelectedMeals} />
+            <MealCalendar onMealsChange={setSelectedMeals} initialMeals={selectedMeals} />
           </section>
 
           {/* Shopping List Section */}

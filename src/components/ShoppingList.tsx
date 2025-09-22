@@ -6,23 +6,67 @@ import { useState } from "react";
 
 // Sample ingredients data - in a real app this would come from a database
 const DISH_INGREDIENTS: { [key: string]: string[] } = {
-  "Tostadas con Palta": ["Pan integral", "Palta", "Tomates", "Sal", "Limón"],
+  "Tostadas con Palta": ["Pan integral", "Palta", "Tomate", "Sal", "Limón"],
   "Huevos Revueltos": ["Huevos", "Leche", "Mantequilla", "Sal", "Pimienta"],
   "Pancakes": ["Harina", "Huevos", "Leche", "Azúcar", "Polvo de hornear", "Mantequilla"],
-  "Pollo al Horno con Papas": ["Pollo entero", "Papas", "Cebolla", "Ajo", "Aceite de oliva", "Romero"],
-  "Pasta con Salsa de Tomate": ["Pasta", "Tomates en lata", "Ajo", "Cebolla", "Albahaca", "Aceite de oliva"],
+  "Pollo al Horno con Papas": ["Pollo entero", "Papa", "Cebolla", "Ajo", "Aceite de oliva", "Romero"],
+  "Pasta con Salsa de Tomate": ["Pasta", "Tomate en lata", "Ajo", "Cebolla", "Albahaca", "Aceite de oliva"],
   "Salmón a la Plancha": ["Salmón", "Limón", "Aceite de oliva", "Sal", "Pimienta", "Eneldo"],
   "Pizza Casera": ["Harina", "Levadura", "Salsa de tomate", "Queso mozzarella", "Aceite de oliva"],
   "Ensalada César": ["Lechuga romana", "Queso parmesano", "Pan", "Ajo", "Limón", "Aceite de oliva"],
-  "Arroz con Verduras": ["Arroz", "Zanahoria", "Arvejas", "Cebolla", "Ajo", "Caldo de verduras"],
+  "Arroz con Verduras": ["Arroz", "Zanahoria", "Arveja", "Cebolla", "Ajo", "Caldo de verduras"],
   "Avena con Frutas": ["Avena", "Leche", "Manzana", "Banana", "Miel", "Canela"],
-  "Yogurt con Granola": ["Yogurt natural", "Granola", "Miel", "Frutas del bosque"],
+  "Yogurt con Granola": ["Yogurt natural", "Granola", "Miel", "Fruta del bosque"],
   "Sándwich de Atún": ["Pan", "Atún en lata", "Mayonesa", "Lechuga", "Tomate"],
-  "Sopa de Lentejas": ["Lentejas", "Zanahoria", "Cebolla", "Apio", "Ajo", "Caldo de verduras"],
+  "Sopa de Lentejas": ["Lenteja", "Zanahoria", "Cebolla", "Apio", "Ajo", "Caldo de verduras"],
   "Ensalada de Quinoa": ["Quinoa", "Pepino", "Tomate", "Cebolla morada", "Limón", "Aceite de oliva"],
-  "Tacos de Pollo": ["Tortillas", "Pollo", "Cebolla", "Pimiento", "Limón", "Cilantro"],
+  "Tacos de Pollo": ["Tortilla", "Pollo", "Cebolla", "Pimiento", "Limón", "Cilantro"],
   "Sopa de Verduras": ["Zanahoria", "Calabacín", "Cebolla", "Apio", "Tomate", "Caldo de verduras"],
-  "Milanesas con Puré": ["Carne para milanesas", "Pan rallado", "Huevos", "Papas", "Leche", "Mantequilla"]
+  "Milanesas con Puré": ["Carne para milanesas", "Pan rallado", "Huevos", "Papa", "Leche", "Mantequilla"]
+};
+
+// Ingredient categories
+const INGREDIENT_CATEGORIES = {
+  "Proteínas": [
+    "Pollo entero", "Pollo", "Salmón", "Huevos", "Carne para milanesas", "Atún en lata", "Lenteja", "Quinoa"
+  ],
+  "Lácteos": [
+    "Leche", "Mantequilla", "Queso mozzarella", "Queso parmesano", "Yogurt natural"
+  ],
+  "Verduras": [
+    "Papa", "Tomate", "Cebolla", "Ajo", "Zanahoria", "Arveja", "Lechuga", "Lechuga romana", 
+    "Pepino", "Cebolla morada", "Pimiento", "Calabacín", "Apio", "Palta"
+  ],
+  "Frutas": [
+    "Manzana", "Banana", "Limón", "Fruta del bosque"
+  ],
+  "Granos y Cereales": [
+    "Pan integral", "Pan", "Harina", "Pasta", "Arroz", "Avena", "Granola", "Pan rallado", "Tortilla"
+  ],
+  "Condimentos y Especias": [
+    "Sal", "Pimienta", "Romero", "Albahaca", "Eneldo", "Miel", "Canela", "Cilantro"
+  ],
+  "Aceites y Salsas": [
+    "Aceite de oliva", "Mayonesa", "Salsa de tomate"
+  ],
+  "Otros": [
+    "Azúcar", "Polvo de hornear", "Levadura", "Caldo de verduras", "Tomate en lata"
+  ]
+};
+
+// Function to normalize ingredient names
+const normalizeIngredient = (ingredient: string): string => {
+  const normalizations: { [key: string]: string } = {
+    "tomates": "tomate",
+    "papas": "papa", 
+    "arvejas": "arveja",
+    "lentejas": "lenteja",
+    "tortillas": "tortilla",
+    "frutas del bosque": "fruta del bosque"
+  };
+  
+  const lower = ingredient.toLowerCase();
+  return normalizations[lower] || ingredient;
 };
 
 interface ShoppingListProps {
@@ -32,17 +76,33 @@ interface ShoppingListProps {
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
 
-  // Collect all ingredients from selected meals
+  // Collect all ingredients from selected meals and normalize
   const allIngredients = new Set<string>();
   Object.values(selectedMeals).forEach(dayMeals => {
     Object.values(dayMeals).forEach(dish => {
       if (dish && DISH_INGREDIENTS[dish]) {
-        DISH_INGREDIENTS[dish].forEach(ingredient => allIngredients.add(ingredient));
+        DISH_INGREDIENTS[dish].forEach(ingredient => {
+          allIngredients.add(normalizeIngredient(ingredient));
+        });
       }
     });
   });
 
-  const ingredientsList = Array.from(allIngredients).sort();
+  // Categorize ingredients
+  const categorizedIngredients: { [category: string]: string[] } = {};
+  
+  Object.entries(INGREDIENT_CATEGORIES).forEach(([category, categoryIngredients]) => {
+    const foundIngredients = Array.from(allIngredients).filter(ingredient =>
+      categoryIngredients.some(catIngredient => 
+        normalizeIngredient(catIngredient).toLowerCase() === ingredient.toLowerCase()
+      )
+    );
+    if (foundIngredients.length > 0) {
+      categorizedIngredients[category] = foundIngredients.sort();
+    }
+  });
+
+  const totalIngredients = Array.from(allIngredients);
 
   const toggleItem = (ingredient: string) => {
     const newChecked = new Set(checkedItems);
@@ -55,7 +115,7 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   };
 
   const checkedCount = checkedItems.size;
-  const totalCount = ingredientsList.length;
+  const totalCount = totalIngredients.length;
 
   return (
     <Card className="shadow-card">
@@ -80,31 +140,41 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             Agrega platos al calendario para generar tu lista de compras
           </p>
         ) : (
-          <div className="space-y-2">
-            {ingredientsList.map((ingredient) => {
-              const isChecked = checkedItems.has(ingredient);
-              return (
-                <Button
-                  key={ingredient}
-                  variant="ghost"
-                  className={`w-full justify-start h-auto p-3 ${
-                    isChecked ? 'opacity-60 line-through' : ''
-                  }`}
-                  onClick={() => toggleItem(ingredient)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                      isChecked 
-                        ? 'bg-primary border-primary' 
-                        : 'border-muted-foreground/30'
-                    }`}>
-                      {isChecked && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <span className="text-left">{ingredient}</span>
-                  </div>
-                </Button>
-              );
-            })}
+          <div className="space-y-6">
+            {Object.entries(categorizedIngredients).map(([category, ingredients]) => (
+              <div key={category}>
+                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                  {category}
+                </h4>
+                <div className="space-y-2 ml-4">
+                  {ingredients.map((ingredient) => {
+                    const isChecked = checkedItems.has(ingredient);
+                    return (
+                      <Button
+                        key={ingredient}
+                        variant="ghost"
+                        className={`w-full justify-start h-auto p-3 ${
+                          isChecked ? 'opacity-60 line-through' : ''
+                        }`}
+                        onClick={() => toggleItem(ingredient)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                            isChecked 
+                              ? 'bg-primary border-primary' 
+                              : 'border-muted-foreground/30'
+                          }`}>
+                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <span className="text-left">{ingredient}</span>
+                        </div>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

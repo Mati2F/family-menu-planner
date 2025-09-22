@@ -2,7 +2,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Clock, Users, Search } from "lucide-react";
+import { useState } from "react";
 
 const SAMPLE_DISHES = {
   breakfast: [
@@ -38,6 +40,7 @@ interface MealSelectorProps {
 }
 
 export const MealSelector = ({ isOpen, onClose, onSelect, mealType }: MealSelectorProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
   const dishes = SAMPLE_DISHES[mealType] || [];
   
   const mealTitles = {
@@ -45,6 +48,10 @@ export const MealSelector = ({ isOpen, onClose, onSelect, mealType }: MealSelect
     lunch: "Almuerzo", 
     dinner: "Cena"
   };
+
+  const filteredDishes = dishes.filter(dish => 
+    dish.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -55,9 +62,24 @@ export const MealSelector = ({ isOpen, onClose, onSelect, mealType }: MealSelect
           </DialogTitle>
         </DialogHeader>
         
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Buscar plato..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        
         <ScrollArea className="max-h-[400px]">
           <div className="space-y-3 p-1">
-            {dishes.map((dish, index) => (
+            {filteredDishes.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                No se encontraron platos que coincidan con "{searchTerm}"
+              </p>
+            ) : (
+              filteredDishes.map((dish, index) => (
               <Button
                 key={index}
                 variant="outline"
@@ -76,7 +98,8 @@ export const MealSelector = ({ isOpen, onClose, onSelect, mealType }: MealSelect
                   </div>
                 </div>
               </Button>
-            ))}
+              ))
+            )}
           </div>
         </ScrollArea>
       </DialogContent>
