@@ -5,25 +5,25 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import jsPDF from "jspdf";
 
-// Sample ingredients data - in a real app this would come from a database
-const DISH_INGREDIENTS: { [key: string]: string[] } = {
-  "Tostadas con Palta": ["Pan integral", "Palta", "Tomate", "Sal", "Limón"],
-  "Huevos Revueltos": ["Huevos", "Leche", "Mantequilla", "Sal", "Pimienta"],
-  "Pancakes": ["Harina", "Huevos", "Leche", "Azúcar", "Polvo de hornear", "Mantequilla"],
-  "Pollo al Horno con Papas": ["Pollo entero", "Papa", "Cebolla", "Ajo", "Aceite de oliva", "Romero"],
-  "Pasta con Salsa de Tomate": ["Pasta", "Tomate en lata", "Ajo", "Cebolla", "Albahaca", "Aceite de oliva"],
-  "Salmón a la Plancha": ["Salmón", "Limón", "Aceite de oliva", "Sal", "Pimienta", "Eneldo"],
-  "Pizza Casera": ["Harina", "Levadura", "Salsa de tomate", "Queso mozzarella", "Aceite de oliva"],
-  "Ensalada César": ["Lechuga romana", "Queso parmesano", "Pan", "Ajo", "Limón", "Aceite de oliva"],
-  "Arroz con Verduras": ["Arroz", "Zanahoria", "Arveja", "Cebolla", "Ajo", "Caldo de verduras"],
-  "Avena con Frutas": ["Avena", "Leche", "Manzana", "Banana", "Miel", "Canela"],
-  "Yogurt con Granola": ["Yogurt natural", "Granola", "Miel", "Fruta del bosque"],
-  "Sándwich de Atún": ["Pan", "Atún en lata", "Mayonesa", "Lechuga", "Tomate"],
-  "Sopa de Lentejas": ["Lenteja", "Zanahoria", "Cebolla", "Apio", "Ajo", "Caldo de verduras"],
-  "Ensalada de Quinoa": ["Quinoa", "Pepino", "Tomate", "Cebolla morada", "Limón", "Aceite de oliva"],
-  "Tacos de Pollo": ["Tortilla", "Pollo", "Cebolla", "Pimiento", "Limón", "Cilantro"],
-  "Sopa de Verduras": ["Zanahoria", "Calabacín", "Cebolla", "Apio", "Tomate", "Caldo de verduras"],
-  "Milanesas con Puré": ["Carne para milanesas", "Pan rallado", "Huevos", "Papa", "Leche", "Mantequilla"]
+// Sample ingredients data with quantities - in a real app this would come from a database
+const DISH_INGREDIENTS: { [key: string]: { [ingredient: string]: string } } = {
+  "Tostadas con Palta": {"Pan integral": "4 rebanadas", "Palta": "2 unidades", "Tomate": "1 unidad", "Sal": "al gusto", "Limón": "1/2 unidad"},
+  "Huevos Revueltos": {"Huevos": "6 unidades", "Leche": "1/2 taza", "Mantequilla": "2 cucharadas", "Sal": "al gusto", "Pimienta": "al gusto"},
+  "Pancakes": {"Harina": "2 tazas", "Huevos": "2 unidades", "Leche": "1 1/2 tazas", "Azúcar": "2 cucharadas", "Polvo de hornear": "2 cucharaditas", "Mantequilla": "3 cucharadas"},
+  "Pollo al Horno con Papas": {"Pollo entero": "1 unidad", "Papa": "1 kg", "Cebolla": "2 unidades", "Ajo": "4 dientes", "Aceite de oliva": "3 cucharadas", "Romero": "2 ramas"},
+  "Pasta con Salsa de Tomate": {"Pasta": "500g", "Tomate en lata": "1 lata", "Ajo": "3 dientes", "Cebolla": "1 unidad", "Albahaca": "hojas frescas", "Aceite de oliva": "2 cucharadas"},
+  "Salmón a la Plancha": {"Salmón": "4 filetes", "Limón": "2 unidades", "Aceite de oliva": "2 cucharadas", "Sal": "al gusto", "Pimienta": "al gusto", "Eneldo": "ramitas frescas"},
+  "Pizza Casera": {"Harina": "3 tazas", "Levadura": "1 sobre", "Salsa de tomate": "1/2 taza", "Queso mozzarella": "200g", "Aceite de oliva": "2 cucharadas"},
+  "Ensalada César": {"Lechuga romana": "2 cabezas", "Queso parmesano": "100g", "Pan": "4 rebanadas", "Ajo": "2 dientes", "Limón": "1 unidad", "Aceite de oliva": "3 cucharadas"},
+  "Arroz con Verduras": {"Arroz": "2 tazas", "Zanahoria": "2 unidades", "Arveja": "1 taza", "Cebolla": "1 unidad", "Ajo": "2 dientes", "Caldo de verduras": "4 tazas"},
+  "Avena con Frutas": {"Avena": "1 taza", "Leche": "2 tazas", "Manzana": "2 unidades", "Banana": "2 unidades", "Miel": "2 cucharadas", "Canela": "1 cucharadita"},
+  "Yogurt con Granola": {"Yogurt natural": "2 tazas", "Granola": "1/2 taza", "Miel": "2 cucharadas", "Fruta del bosque": "1 taza"},
+  "Sándwich de Atún": {"Pan": "8 rebanadas", "Atún en lata": "2 latas", "Mayonesa": "3 cucharadas", "Lechuga": "hojas", "Tomate": "2 unidades"},
+  "Sopa de Lentejas": {"Lenteja": "2 tazas", "Zanahoria": "3 unidades", "Cebolla": "1 unidad", "Apio": "2 tallos", "Ajo": "3 dientes", "Caldo de verduras": "6 tazas"},
+  "Ensalada de Quinoa": {"Quinoa": "1 1/2 tazas", "Pepino": "2 unidades", "Tomate": "3 unidades", "Cebolla morada": "1/2 unidad", "Limón": "2 unidades", "Aceite de oliva": "3 cucharadas"},
+  "Tacos de Pollo": {"Tortilla": "8 unidades", "Pollo": "500g", "Cebolla": "1 unidad", "Pimiento": "2 unidades", "Limón": "2 unidades", "Cilantro": "1 manojo"},
+  "Sopa de Verduras": {"Zanahoria": "2 unidades", "Calabacín": "2 unidades", "Cebolla": "1 unidad", "Apio": "2 tallos", "Tomate": "2 unidades", "Caldo de verduras": "6 tazas"},
+  "Milanesas con Puré": {"Carne para milanesas": "8 unidades", "Pan rallado": "2 tazas", "Huevos": "3 unidades", "Papa": "1 kg", "Leche": "1/2 taza", "Mantequilla": "3 cucharadas"}
 };
 
 // Ingredient categories
@@ -77,17 +77,23 @@ interface ShoppingListProps {
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
 
-  // Collect all ingredients from selected meals and normalize
-  const allIngredients = new Set<string>();
+  // Collect all ingredients from selected meals with quantities
+  const ingredientQuantities: { [ingredient: string]: string[] } = {};
   Object.values(selectedMeals).forEach(dayMeals => {
     Object.values(dayMeals).forEach(dish => {
       if (dish && DISH_INGREDIENTS[dish]) {
-        DISH_INGREDIENTS[dish].forEach(ingredient => {
-          allIngredients.add(normalizeIngredient(ingredient));
+        Object.entries(DISH_INGREDIENTS[dish]).forEach(([ingredient, quantity]) => {
+          const normalizedIngredient = normalizeIngredient(ingredient);
+          if (!ingredientQuantities[normalizedIngredient]) {
+            ingredientQuantities[normalizedIngredient] = [];
+          }
+          ingredientQuantities[normalizedIngredient].push(quantity);
         });
       }
     });
   });
+
+  const allIngredients = new Set(Object.keys(ingredientQuantities));
 
   // Categorize ingredients
   const categorizedIngredients: { [category: string]: string[] } = {};
@@ -145,7 +151,12 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
       ingredients.forEach(ingredient => {
         const isChecked = checkedItems.has(ingredient);
         const checkbox = isChecked ? '☑' : '☐';
-        doc.text(`${checkbox} ${ingredient}`, 25, yPosition);
+        const quantities = ingredientQuantities[ingredient] || [];
+        const quantityText = quantities.length > 1 
+          ? `(${quantities.join(', ')})` 
+          : quantities[0] ? `(${quantities[0]})` : '';
+        
+        doc.text(`${checkbox} ${ingredient} ${quantityText}`, 25, yPosition);
         yPosition += 8;
         
         // Add new page if needed
@@ -208,6 +219,11 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
                 <div className="space-y-2 ml-4">
                   {ingredients.map((ingredient) => {
                     const isChecked = checkedItems.has(ingredient);
+                    const quantities = ingredientQuantities[ingredient] || [];
+                    const quantityText = quantities.length > 1 
+                      ? `${quantities.join(', ')}` 
+                      : quantities[0] || '';
+                    
                     return (
                       <Button
                         key={ingredient}
@@ -217,15 +233,20 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
                         }`}
                         onClick={() => toggleItem(ingredient)}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                        <div className="flex items-center gap-3 w-full">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                             isChecked 
                               ? 'bg-primary border-primary' 
                               : 'border-muted-foreground/30'
                           }`}>
                             {isChecked && <Check className="w-3 h-3 text-white" />}
                           </div>
-                          <span className="text-left">{ingredient}</span>
+                          <div className="flex-1 text-left">
+                            <div className="font-medium">{ingredient}</div>
+                            {quantityText && (
+                              <div className="text-sm text-muted-foreground">{quantityText}</div>
+                            )}
+                          </div>
                         </div>
                       </Button>
                     );
