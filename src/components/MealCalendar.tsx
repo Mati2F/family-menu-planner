@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChefHat, Coffee, Sun, Moon, Plus, X, Shuffle, Check } from "lucide-react";
 import { MealSelector } from "./MealSelector";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const MEALS = {
@@ -11,6 +12,27 @@ const MEALS = {
   lunch: { name: "Almuerzo", icon: Sun, color: "bg-gradient-fresh" },
   dinner: { name: "Cena", icon: Moon, color: "bg-primary" }
 } as const;
+
+// Sample ingredients data for tooltips
+const DISH_INGREDIENTS: { [key: string]: { [ingredient: string]: string } } = {
+  "Tostadas con Palta": {"Pan integral": "4 rebanadas", "Palta": "2 unidades", "Tomate": "1 unidad", "Sal": "al gusto", "Limón": "1/2 unidad"},
+  "Huevos Revueltos": {"Huevos": "6 unidades", "Leche": "1/2 taza", "Mantequilla": "2 cucharadas", "Sal": "al gusto", "Pimienta": "al gusto"},
+  "Pancakes": {"Harina": "2 tazas", "Huevos": "2 unidades", "Leche": "1 1/2 tazas", "Azúcar": "2 cucharadas", "Polvo de hornear": "2 cucharaditas", "Mantequilla": "3 cucharadas"},
+  "Pollo al Horno con Papas": {"Pollo entero": "1 unidad", "Papa": "1 kg", "Cebolla": "2 unidades", "Ajo": "4 dientes", "Aceite de oliva": "3 cucharadas", "Romero": "2 ramas"},
+  "Pasta con Salsa de Tomate": {"Pasta": "500g", "Tomate en lata": "1 lata", "Ajo": "3 dientes", "Cebolla": "1 unidad", "Albahaca": "hojas frescas", "Aceite de oliva": "2 cucharadas"},
+  "Salmón a la Plancha": {"Salmón": "4 filetes", "Limón": "2 unidades", "Aceite de oliva": "2 cucharadas", "Sal": "al gusto", "Pimienta": "al gusto", "Eneldo": "ramitas frescas"},
+  "Pizza Casera": {"Harina": "3 tazas", "Levadura": "1 sobre", "Salsa de tomate": "1/2 taza", "Queso mozzarella": "200g", "Aceite de oliva": "2 cucharadas"},
+  "Ensalada César": {"Lechuga romana": "2 cabezas", "Queso parmesano": "100g", "Pan": "4 rebanadas", "Ajo": "2 dientes", "Limón": "1 unidad", "Aceite de oliva": "3 cucharadas"},
+  "Arroz con Verduras": {"Arroz": "2 tazas", "Zanahoria": "2 unidades", "Arveja": "1 taza", "Cebolla": "1 unidad", "Ajo": "2 dientes", "Caldo de verduras": "4 tazas"},
+  "Avena con Frutas": {"Avena": "1 taza", "Leche": "2 tazas", "Manzana": "2 unidades", "Banana": "2 unidades", "Miel": "2 cucharadas", "Canela": "1 cucharadita"},
+  "Yogurt con Granola": {"Yogurt natural": "2 tazas", "Granola": "1/2 taza", "Miel": "2 cucharadas", "Fruta del bosque": "1 taza"},
+  "Sándwich de Atún": {"Pan": "8 rebanadas", "Atún en lata": "2 latas", "Mayonesa": "3 cucharadas", "Lechuga": "hojas", "Tomate": "2 unidades"},
+  "Sopa de Lentejas": {"Lenteja": "2 tazas", "Zanahoria": "3 unidades", "Cebolla": "1 unidad", "Apio": "2 tallos", "Ajo": "3 dientes", "Caldo de verduras": "6 tazas"},
+  "Ensalada de Quinoa": {"Quinoa": "1 1/2 tazas", "Pepino": "2 unidades", "Tomate": "3 unidades", "Cebolla morada": "1/2 unidad", "Limón": "2 unidades", "Aceite de oliva": "3 cucharadas"},
+  "Tacos de Pollo": {"Tortilla": "8 unidades", "Pollo": "500g", "Cebolla": "1 unidad", "Pimiento": "2 unidades", "Limón": "2 unidades", "Cilantro": "1 manojo"},
+  "Sopa de Verduras": {"Zanahoria": "2 unidades", "Calabacín": "2 unidades", "Cebolla": "1 unidad", "Apio": "2 tallos", "Tomate": "2 unidades", "Caldo de verduras": "6 tazas"},
+  "Milanesas con Puré": {"Carne para milanesas": "8 unidades", "Pan rallado": "2 tazas", "Huevos": "3 unidades", "Papa": "1 kg", "Leche": "1/2 taza", "Mantequilla": "3 cucharadas"}
+};
 
 const SAMPLE_DISHES = {
   breakfast: [
@@ -134,7 +156,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
   };
 
   return (
-    <>
+    <TooltipProvider>
       <div className="mb-6 flex gap-3">
         <Button 
           onClick={handleGenerateRandom}
@@ -189,15 +211,33 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                     
                     {selectedDish ? (
                       <div className="relative group">
-                        <Button 
-                          variant="secondary"
-                          className={`w-full h-auto p-3 text-left justify-start transition-all ${
-                            isCompleted ? 'opacity-60 line-through' : ''
-                          }`}
-                          onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                        >
-                          <span className="text-sm">{selectedDish}</span>
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="secondary"
+                              className={`w-full h-auto p-3 text-left justify-start transition-all ${
+                                isCompleted ? 'opacity-60 line-through' : ''
+                              }`}
+                              onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                            >
+                              <span className="text-sm">{selectedDish}</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-sm">
+                            <div className="space-y-1">
+                              <p className="font-semibold text-sm">Ingredientes:</p>
+                              {DISH_INGREDIENTS[selectedDish] ? (
+                                <ul className="text-xs space-y-0.5">
+                                  {Object.entries(DISH_INGREDIENTS[selectedDish]).map(([ingredient, quantity]) => (
+                                    <li key={ingredient}>• {ingredient}: {quantity}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
+                              )}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -238,6 +278,6 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
           mealType={selectedSlot.meal}
         />
       )}
-    </>
+    </TooltipProvider>
   );
 };

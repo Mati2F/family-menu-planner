@@ -70,6 +70,28 @@ const normalizeIngredient = (ingredient: string): string => {
   return normalizations[lower] || ingredient;
 };
 
+// Function to sum quantities numerically
+const sumQuantities = (quantities: string[]): string => {
+  // Extract numbers from quantity strings and sum them
+  const total = quantities.reduce((sum, qty) => {
+    const match = qty.match(/(\d+(?:\.\d+)?)/);
+    if (match) {
+      return sum + parseFloat(match[1]);
+    }
+    return sum;
+  }, 0);
+
+  // Get the unit from the first quantity
+  const unitMatch = quantities[0]?.match(/(\d+(?:\.\d+)?\s*(?:taza|cucharada|unidad|kg|g|lata|cabeza|diente|rama|hoja|sobre|tallo|manojo|rebanada|filete|cucharadita)?s?)/);
+  const unit = unitMatch ? unitMatch[0].replace(/^\d+(?:\.\d+)?\s*/, '') : '';
+  
+  // Handle special cases
+  if (unit === 'al gusto') return 'al gusto';
+  if (quantities.some(q => q === 'al gusto')) return 'al gusto';
+  
+  return total > 0 ? `${total} ${unit}`.trim() : quantities.join(', ');
+};
+
 interface ShoppingListProps {
   selectedMeals: { [key: string]: { breakfast?: string; lunch?: string; dinner?: string } };
 }
@@ -77,39 +99,38 @@ interface ShoppingListProps {
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
 
-  // Collect all ingredients from selected meals with quantities
-  const ingredientQuantities: { [ingredient: string]: string[] } = {};
-  Object.values(selectedMeals).forEach(dayMeals => {
+  const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+  // Group ingredients by day and sum quantities
+  const dailyIngredients: { [day: string]: { [ingredient: string]: string } } = {};
+  
+  Object.entries(selectedMeals).forEach(([day, dayMeals]) => {
+    const dayIngredients: { [ingredient: string]: string[] } = {};
+    
     Object.values(dayMeals).forEach(dish => {
       if (dish && DISH_INGREDIENTS[dish]) {
         Object.entries(DISH_INGREDIENTS[dish]).forEach(([ingredient, quantity]) => {
           const normalizedIngredient = normalizeIngredient(ingredient);
-          if (!ingredientQuantities[normalizedIngredient]) {
-            ingredientQuantities[normalizedIngredient] = [];
+          if (!dayIngredients[normalizedIngredient]) {
+            dayIngredients[normalizedIngredient] = [];
           }
-          ingredientQuantities[normalizedIngredient].push(quantity);
+          dayIngredients[normalizedIngredient].push(quantity);
         });
       }
     });
-  });
 
-  const allIngredients = new Set(Object.keys(ingredientQuantities));
-
-  // Categorize ingredients
-  const categorizedIngredients: { [category: string]: string[] } = {};
-  
-  Object.entries(INGREDIENT_CATEGORIES).forEach(([category, categoryIngredients]) => {
-    const foundIngredients = Array.from(allIngredients).filter(ingredient =>
-      categoryIngredients.some(catIngredient => 
-        normalizeIngredient(catIngredient).toLowerCase() === ingredient.toLowerCase()
-      )
-    );
-    if (foundIngredients.length > 0) {
-      categorizedIngredients[category] = foundIngredients.sort();
+    // Sum quantities for each ingredient per day
+    if (Object.keys(dayIngredients).length > 0) {
+      dailyIngredients[day] = {};
+      Object.entries(dayIngredients).forEach(([ingredient, quantities]) => {
+        dailyIngredients[day][ingredient] = sumQuantities(quantities);
+      });
     }
   });
 
-  const totalIngredients = Array.from(allIngredients);
+  const totalIngredients = Object.values(dailyIngredients).reduce((total, dayIngredients) => 
+    total + Object.keys(dayIngredients).length, 0
+  );
 
   const toggleItem = (ingredient: string) => {
     const newChecked = new Set(checkedItems);
@@ -122,7 +143,7 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   };
 
   const checkedCount = checkedItems.size;
-  const totalCount = totalIngredients.length;
+  const totalCount = totalIngredients;
 
   const downloadPDF = () => {
     const doc = new jsPDF();
@@ -137,36 +158,34 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
     
     let yPosition = 65;
     
-    // Categories and ingredients
-    Object.entries(categorizedIngredients).forEach(([category, ingredients]) => {
-      // Category title
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(category, 20, yPosition);
-      yPosition += 10;
-      
-      // Ingredients
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'normal');
-      ingredients.forEach(ingredient => {
-        const isChecked = checkedItems.has(ingredient);
-        const checkbox = isChecked ? '☑' : '☐';
-        const quantities = ingredientQuantities[ingredient] || [];
-        const quantityText = quantities.length > 1 
-          ? `(${quantities.join(', ')})` 
-          : quantities[0] ? `(${quantities[0]})` : '';
+    // Days and ingredients
+    DAYS.forEach(day => {
+      if (dailyIngredients[day]) {
+        // Day title
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(day, 20, yPosition);
+        yPosition += 10;
         
-        doc.text(`${checkbox} ${ingredient} ${quantityText}`, 25, yPosition);
-        yPosition += 8;
+        // Ingredients for this day
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        Object.entries(dailyIngredients[day]).forEach(([ingredient, quantity]) => {
+          const isChecked = checkedItems.has(`${day}-${ingredient}`);
+          const checkbox = isChecked ? '☑' : '☐';
+          
+          doc.text(`${checkbox} ${ingredient} (${quantity})`, 25, yPosition);
+          yPosition += 8;
+          
+          // Add new page if needed
+          if (yPosition > 270) {
+            doc.addPage();
+            yPosition = 30;
+          }
+        });
         
-        // Add new page if needed
-        if (yPosition > 270) {
-          doc.addPage();
-          yPosition = 30;
-        }
-      });
-      
-      yPosition += 5; // Space between categories
+        yPosition += 5; // Space between days
+      }
     });
     
     // Save the PDF
@@ -210,50 +229,49 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
           </p>
         ) : (
           <div className="space-y-6">
-            {Object.entries(categorizedIngredients).map(([category, ingredients]) => (
-              <div key={category}>
-                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  {category}
-                </h4>
-                <div className="space-y-2 ml-4">
-                  {ingredients.map((ingredient) => {
-                    const isChecked = checkedItems.has(ingredient);
-                    const quantities = ingredientQuantities[ingredient] || [];
-                    const quantityText = quantities.length > 1 
-                      ? `${quantities.join(', ')}` 
-                      : quantities[0] || '';
-                    
-                    return (
-                      <Button
-                        key={ingredient}
-                        variant="ghost"
-                        className={`w-full justify-start h-auto p-3 ${
-                          isChecked ? 'opacity-60 line-through' : ''
-                        }`}
-                        onClick={() => toggleItem(ingredient)}
-                      >
-                        <div className="flex items-center gap-3 w-full">
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                            isChecked 
-                              ? 'bg-primary border-primary' 
-                              : 'border-muted-foreground/30'
-                          }`}>
-                            {isChecked && <Check className="w-3 h-3 text-white" />}
+            {DAYS.map(day => {
+              if (!dailyIngredients[day]) return null;
+              
+              return (
+                <div key={day}>
+                  <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary"></div>
+                    {day}
+                  </h4>
+                  <div className="space-y-2 ml-4">
+                    {Object.entries(dailyIngredients[day]).map(([ingredient, quantity]) => {
+                      const itemKey = `${day}-${ingredient}`;
+                      const isChecked = checkedItems.has(itemKey);
+                      
+                      return (
+                        <Button
+                          key={itemKey}
+                          variant="ghost"
+                          className={`w-full justify-start h-auto p-3 ${
+                            isChecked ? 'opacity-60 line-through' : ''
+                          }`}
+                          onClick={() => toggleItem(itemKey)}
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                              isChecked 
+                                ? 'bg-primary border-primary' 
+                                : 'border-muted-foreground/30'
+                            }`}>
+                              {isChecked && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <div className="flex-1 text-left">
+                              <div className="font-medium">{ingredient}</div>
+                              <div className="text-sm text-muted-foreground">{quantity}</div>
+                            </div>
                           </div>
-                          <div className="flex-1 text-left">
-                            <div className="font-medium">{ingredient}</div>
-                            {quantityText && (
-                              <div className="text-sm text-muted-foreground">{quantityText}</div>
-                            )}
-                          </div>
-                        </div>
-                      </Button>
-                    );
-                  })}
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>
