@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Check } from "lucide-react";
+import { ShoppingCart, Check, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import jsPDF from "jspdf";
 
 // Sample ingredients data - in a real app this would come from a database
 const DISH_INGREDIENTS: { [key: string]: string[] } = {
@@ -117,6 +118,50 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const checkedCount = checkedItems.size;
   const totalCount = totalIngredients.length;
 
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(20);
+    doc.text("Lista de Compras", 20, 30);
+    
+    // Date
+    doc.setFontSize(12);
+    doc.text(`Generada el: ${new Date().toLocaleDateString('es-ES')}`, 20, 45);
+    
+    let yPosition = 65;
+    
+    // Categories and ingredients
+    Object.entries(categorizedIngredients).forEach(([category, ingredients]) => {
+      // Category title
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(category, 20, yPosition);
+      yPosition += 10;
+      
+      // Ingredients
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+      ingredients.forEach(ingredient => {
+        const isChecked = checkedItems.has(ingredient);
+        const checkbox = isChecked ? '☑' : '☐';
+        doc.text(`${checkbox} ${ingredient}`, 25, yPosition);
+        yPosition += 8;
+        
+        // Add new page if needed
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 30;
+        }
+      });
+      
+      yPosition += 5; // Space between categories
+    });
+    
+    // Save the PDF
+    doc.save('lista-de-compras.pdf');
+  };
+
   return (
     <Card className="shadow-card">
       <CardHeader>
@@ -127,11 +172,24 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             </div>
             Lista de Compras
           </CardTitle>
-          {totalCount > 0 && (
-            <Badge variant="secondary" className="text-sm">
-              {checkedCount}/{totalCount} completados
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {totalCount > 0 && (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={downloadPDF}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Descargar PDF
+                </Button>
+                <Badge variant="secondary" className="text-sm">
+                  {checkedCount}/{totalCount} completados
+                </Badge>
+              </>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
