@@ -166,7 +166,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
           return (
             <Card key={day} className={`p-4 shadow-card transition-all ${isDayCompleted ? 'bg-green-600/20 border-green-600/30' : ''}`}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-center text-foreground">{day}</h3>
+                <h3 className={`font-semibold text-center text-foreground ${isDayCompleted ? 'line-through' : ''}`}>{day}</h3>
                 {hasMeals && (
                   <Button
                     size="sm"
@@ -203,7 +203,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                                 className="w-full h-auto p-3 text-left justify-start transition-all"
                                 onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
                               >
-                                <span className="text-sm">{selectedDish}</span>
+                                <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedDish}</span>
                               </Button>
                             </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-sm">
@@ -241,7 +241,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                       >
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Plus className="w-4 h-4" />
-                          <span className="text-sm">Agregar plato</span>
+                          <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
                         </div>
                       </Button>
                         )}

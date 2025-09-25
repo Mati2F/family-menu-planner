@@ -79,64 +79,75 @@ const normalizeIngredient = (ingredient: string): string => {
 // Function to sum quantities numerically
 const sumQuantities = (quantities: string[]): string => {
   // Handle special cases first
-  if (quantities.some(q => q === 'al gusto')) return 'al gusto';
-  
-  // Extract numbers from quantity strings and sum them, including fractions and mixed numbers
-  const total = quantities.reduce((sum, qty) => {
-    // Handle mixed numbers like "1 1/2"
-    const mixedMatch = qty.match(/(\d+)\s+(\d+)\/(\d+)/);
-    if (mixedMatch) {
-      const wholeNumber = parseFloat(mixedMatch[1]);
-      const numerator = parseFloat(mixedMatch[2]);
-      const denominator = parseFloat(mixedMatch[3]);
-      return sum + wholeNumber + (numerator / denominator);
+  if (quantities.some((q) => q.trim() === 'al gusto')) return 'al gusto';
+
+  // Helper to parse a quantity string into numeric value and unit
+  const parseQty = (raw: string): { value: number; unit: string } => {
+    const qty = raw.trim();
+
+    // Mixed number: "1 1/2 unidad(es)"
+    let m = qty.match(/^(\d+)\s+(\d+)\/(\d+)\s*(.*)$/);
+    if (m) {
+      const whole = parseFloat(m[1]);
+      const num = parseFloat(m[2]);
+      const den = parseFloat(m[3]);
+      const unit = (m[4] || '').trim();
+      return { value: whole + num / den, unit };
     }
-    
-    // Handle simple fractions like "1/2"
-    const fractionMatch = qty.match(/^(\d+)\/(\d+)/);
-    if (fractionMatch) {
-      const numerator = parseFloat(fractionMatch[1]);
-      const denominator = parseFloat(fractionMatch[2]);
-      return sum + (numerator / denominator);
+
+    // Simple fraction: "1/2 unidad(es)"
+    m = qty.match(/^(\d+)\/(\d+)\s*(.*)$/);
+    if (m) {
+      const num = parseFloat(m[1]);
+      const den = parseFloat(m[2]);
+      const unit = (m[3] || '').trim();
+      return { value: num / den, unit };
     }
-    
-    // Handle whole numbers and decimals
-    const decimalMatch = qty.match(/^(\d+(?:\.\d+)?)/);
-    if (decimalMatch) {
-      return sum + parseFloat(decimalMatch[1]);
+
+    // Decimal or integer: "2.5 unidades" o "2 unidades"
+    m = qty.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+    if (m) {
+      const unit = (m[2] || '').trim();
+      return { value: parseFloat(m[1]), unit };
     }
-    
-    return sum;
+
+    return { value: 0, unit: '' };
+  };
+
+  // Sum numeric values and keep the first non-empty unit
+  let unit = '';
+  const total = quantities.reduce((sum, q) => {
+    const { value, unit: u } = parseQty(q);
+    if (!unit && u) unit = u;
+    return sum + value;
   }, 0);
 
-  // Get the unit from the first non-empty quantity
-  let unit = '';
-  for (const qty of quantities) {
-    const unitMatch = qty.match(/(?:\d+(?:\.\d+)?|\d+\/\d+)\s*(.+?)$/);
-    if (unitMatch && unitMatch[1]) {
-      unit = unitMatch[1].trim();
-      break;
-    }
-  }
-  
+  const EPS = 1e-6;
   if (total > 0) {
-    // Format the total, showing fractions when appropriate
-    if (total % 1 === 0.5) {
-      const wholeNumber = Math.floor(total);
-      const result = wholeNumber > 0 ? `${wholeNumber} 1/2` : `1/2`;
-      return unit ? `${result} ${unit}` : result;
-    } else if (total % 1 === 0) {
-      const result = `${total}`;
-      return unit ? `${result} ${unit}` : result;
-    } else {
-      const result = `${total.toFixed(1)}`;
+    const whole = Math.round(total);
+    const frac = total - Math.floor(total);
+
+    // Exact integer
+    if (Math.abs(total - whole) < EPS) {
+      const result = `${whole}`;
       return unit ? `${result} ${unit}` : result;
     }
+
+    // Half increments
+    const wholeDown = Math.floor(total + EPS);
+    if (Math.abs(frac - 0.5) < EPS) {
+      const result = wholeDown > 0 ? `${wholeDown} 1/2` : `1/2`;
+      return unit ? `${result} ${unit}` : result;
+    }
+
+    // Fallback to one decimal
+    const result = `${total.toFixed(1)}`;
+    return unit ? `${result} ${unit}` : result;
   }
-  
+
+  // If nothing was parsed, return the raw list
   return quantities.join(', ');
 };
-
 interface ShoppingListProps {
   selectedMeals: { [key: string]: { breakfast?: string; lunch?: string; dinner?: string } };
 }
