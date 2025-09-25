@@ -101,18 +101,22 @@ const sumQuantities = (quantities: string[]): string => {
   }, 0);
 
   // Get the unit from the first quantity
-  const unitMatch = quantities[0]?.match(/(?:\d+(?:\.\d+)?|\d+\/\d+)\s*((?:taza|cucharada|unidad|kg|g|lata|cabeza|diente|rama|hoja|sobre|tallo|manojo|rebanada|filete|cucharadita)?s?)/);
-  const unit = unitMatch ? unitMatch[1] : '';
+  const firstQuantity = quantities[0] || '';
+  const unitMatch = firstQuantity.match(/(?:\d+(?:\.\d+)?|\d+\/\d+)\s*(.+?)$/);
+  const unit = unitMatch && unitMatch[1] ? unitMatch[1].trim() : '';
   
   if (total > 0) {
     // Format the total, showing fractions when appropriate
     if (total % 1 === 0.5) {
       const wholeNumber = Math.floor(total);
-      return wholeNumber > 0 ? `${wholeNumber} 1/2 ${unit}`.trim() : `1/2 ${unit}`.trim();
+      const result = wholeNumber > 0 ? `${wholeNumber} 1/2` : `1/2`;
+      return unit ? `${result} ${unit}` : result;
     } else if (total % 1 === 0) {
-      return `${total} ${unit}`.trim();
+      const result = `${total}`;
+      return unit ? `${result} ${unit}` : result;
     } else {
-      return `${total.toFixed(1)} ${unit}`.trim();
+      const result = `${total.toFixed(1)}`;
+      return unit ? `${result} ${unit}` : result;
     }
   }
   
