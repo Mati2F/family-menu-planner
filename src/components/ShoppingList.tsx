@@ -100,10 +100,15 @@ const sumQuantities = (quantities: string[]): string => {
     return sum;
   }, 0);
 
-  // Get the unit from the first quantity
-  const firstQuantity = quantities[0] || '';
-  const unitMatch = firstQuantity.match(/(?:\d+(?:\.\d+)?|\d+\/\d+)\s*(.+?)$/);
-  const unit = unitMatch && unitMatch[1] ? unitMatch[1].trim() : '';
+  // Get the unit from the first non-empty quantity
+  let unit = '';
+  for (const qty of quantities) {
+    const unitMatch = qty.match(/(?:\d+(?:\.\d+)?|\d+\/\d+)\s*(.+?)$/);
+    if (unitMatch && unitMatch[1]) {
+      unit = unitMatch[1].trim();
+      break;
+    }
+  }
   
   if (total > 0) {
     // Format the total, showing fractions when appropriate
