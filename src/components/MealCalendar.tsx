@@ -164,7 +164,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
           const hasMeals = meals[day] && Object.keys(meals[day]).length > 0;
           
           return (
-            <Card key={day} className={`p-4 shadow-card transition-all ${isDayCompleted ? 'bg-muted/50 opacity-70 border-muted' : ''}`}>
+            <Card key={day} className={`p-4 shadow-card transition-all ${isDayCompleted ? 'bg-green-600/20 border-green-600/30' : ''}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-center text-foreground">{day}</h3>
                 {hasMeals && (

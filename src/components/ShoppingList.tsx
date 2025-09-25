@@ -81,18 +81,27 @@ const sumQuantities = (quantities: string[]): string => {
   // Handle special cases first
   if (quantities.some(q => q === 'al gusto')) return 'al gusto';
   
-  // Extract numbers from quantity strings and sum them, including fractions
+  // Extract numbers from quantity strings and sum them, including fractions and mixed numbers
   const total = quantities.reduce((sum, qty) => {
-    // Handle fractions like "1/2"
-    const fractionMatch = qty.match(/(\d+)\/(\d+)/);
+    // Handle mixed numbers like "1 1/2"
+    const mixedMatch = qty.match(/(\d+)\s+(\d+)\/(\d+)/);
+    if (mixedMatch) {
+      const wholeNumber = parseFloat(mixedMatch[1]);
+      const numerator = parseFloat(mixedMatch[2]);
+      const denominator = parseFloat(mixedMatch[3]);
+      return sum + wholeNumber + (numerator / denominator);
+    }
+    
+    // Handle simple fractions like "1/2"
+    const fractionMatch = qty.match(/^(\d+)\/(\d+)/);
     if (fractionMatch) {
       const numerator = parseFloat(fractionMatch[1]);
       const denominator = parseFloat(fractionMatch[2]);
       return sum + (numerator / denominator);
     }
     
-    // Handle decimal numbers
-    const decimalMatch = qty.match(/(\d+(?:\.\d+)?)/);
+    // Handle whole numbers and decimals
+    const decimalMatch = qty.match(/^(\d+(?:\.\d+)?)/);
     if (decimalMatch) {
       return sum + parseFloat(decimalMatch[1]);
     }
