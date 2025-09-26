@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const WEEK_1_DAYS = DAYS.map(day => day);
+const WEEK_2_DAYS = DAYS.map(day => `${day} - Semana 2`);
 const MEALS = {
   breakfast: { name: "Desayuno", icon: Coffee, color: "bg-gradient-warm" },
   lunch: { name: "Almuerzo", icon: Sun, color: "bg-gradient-fresh" },
@@ -121,8 +123,9 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
 
   const handleGenerateRandom = () => {
     const randomMeals: MealData = {};
+    const allDays = [...WEEK_1_DAYS, ...WEEK_2_DAYS];
     
-    DAYS.forEach(day => {
+    allDays.forEach(day => {
       randomMeals[day] = {};
       Object.keys(MEALS).forEach(mealKey => {
         const mealType = mealKey as MealType;
@@ -158,100 +161,206 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-        {DAYS.map((day) => {
-          const isDayCompleted = progress[day];
-          const hasMeals = meals[day] && Object.keys(meals[day]).length > 0;
-          
-          return (
-            <Card key={day} className={`p-4 shadow-card transition-all ${isDayCompleted ? 'bg-green-600/20 border-green-600/30' : ''}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className={`font-semibold text-center text-foreground ${isDayCompleted ? 'line-through' : ''}`}>{day}</h3>
-                {hasMeals && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={`p-1 h-6 w-6 ${isDayCompleted ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
-                    onClick={() => toggleDayProgress(day)}
-                  >
-                    <Check className="w-3 h-3" />
-                  </Button>
-                )}
-              </div>
-              <div className="space-y-3">
-                {Object.entries(MEALS).map(([mealKey, meal]) => {
-                  const MealIcon = meal.icon;
-                  const selectedDish = meals[day]?.[mealKey as MealType];
-                  
-                  return (
-                    <div key={mealKey} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-full ${meal.color}`}>
-                          <MealIcon className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-sm font-medium text-muted-foreground">
-                          {meal.name}
-                        </span>
-                      </div>
-                      
-                      {selectedDish ? (
-                        <div className="relative group">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                variant="secondary"
-                                className="w-full h-auto p-3 text-left justify-start transition-all"
-                                onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                              >
-                                <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedDish}</span>
-                              </Button>
-                            </TooltipTrigger>
-                          <TooltipContent side="right" className="max-w-sm">
-                            <div className="space-y-1">
-                              <p className="font-semibold text-sm">Ingredientes:</p>
-                              {DISH_INGREDIENTS[selectedDish] ? (
-                                <ul className="text-xs space-y-0.5">
-                                  {Object.entries(DISH_INGREDIENTS[selectedDish]).map(([ingredient, quantity]) => (
-                                    <li key={ingredient}>• {ingredient}: {quantity}</li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
-                              )}
-                            </div>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveMeal(day, mealKey as MealType);
-                            }}
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                      <Button 
-                        variant="outline"
-                        className="w-full h-auto p-3 text-left justify-start"
-                        onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+      <div className="space-y-6">
+        {/* Semana 1 */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Semana 1</h2>
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+            {WEEK_1_DAYS.map((day) => {
+              const isDayCompleted = progress[day];
+              const hasMeals = meals[day] && Object.keys(meals[day]).length > 0;
+              
+              return (
+                <Card key={day} className={`p-4 shadow-card transition-all ${isDayCompleted ? 'bg-green-600/20 border-green-600/30' : ''}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`font-semibold text-center text-foreground ${isDayCompleted ? 'line-through' : ''}`}>{day}</h3>
+                    {hasMeals && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={`p-1 h-6 w-6 ${isDayCompleted ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                        onClick={() => toggleDayProgress(day)}
                       >
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Plus className="w-4 h-4" />
-                          <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
-                        </div>
+                        <Check className="w-3 h-3" />
                       </Button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            );
-          })}
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(MEALS).map(([mealKey, meal]) => {
+                      const MealIcon = meal.icon;
+                      const selectedDish = meals[day]?.[mealKey as MealType];
+                      
+                      return (
+                        <div key={mealKey} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`p-1.5 rounded-full ${meal.color}`}>
+                              <MealIcon className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm font-medium text-muted-foreground">
+                              {meal.name}
+                            </span>
+                          </div>
+                          
+                          {selectedDish ? (
+                            <div className="relative group">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="secondary"
+                                    className="w-full h-auto p-3 text-left justify-start transition-all"
+                                    onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                                  >
+                                    <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedDish}</span>
+                                  </Button>
+                                </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-sm">
+                                <div className="space-y-1">
+                                  <p className="font-semibold text-sm">Ingredientes:</p>
+                                  {DISH_INGREDIENTS[selectedDish] ? (
+                                    <ul className="text-xs space-y-0.5">
+                                      {Object.entries(DISH_INGREDIENTS[selectedDish]).map(([ingredient, quantity]) => (
+                                        <li key={ingredient}>• {ingredient}: {quantity}</li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
+                                  )}
+                                </div>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveMeal(day, mealKey as MealType);
+                                }}
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                          <Button 
+                            variant="outline"
+                            className="w-full h-auto p-3 text-left justify-start"
+                            onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                          >
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Plus className="w-4 h-4" />
+                              <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
+                            </div>
+                          </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+        {/* Semana 2 */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Semana 2</h2>
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+            {WEEK_2_DAYS.map((day) => {
+              const isDayCompleted = progress[day];
+              const hasMeals = meals[day] && Object.keys(meals[day]).length > 0;
+              
+              return (
+                <Card key={day} className={`p-4 shadow-card transition-all ${isDayCompleted ? 'bg-green-600/20 border-green-600/30' : ''}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`font-semibold text-center text-foreground ${isDayCompleted ? 'line-through' : ''}`}>{day.replace(' - Semana 2', '')}</h3>
+                    {hasMeals && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={`p-1 h-6 w-6 ${isDayCompleted ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                        onClick={() => toggleDayProgress(day)}
+                      >
+                        <Check className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(MEALS).map(([mealKey, meal]) => {
+                      const MealIcon = meal.icon;
+                      const selectedDish = meals[day]?.[mealKey as MealType];
+                      
+                      return (
+                        <div key={mealKey} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`p-1.5 rounded-full ${meal.color}`}>
+                              <MealIcon className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm font-medium text-muted-foreground">
+                              {meal.name}
+                            </span>
+                          </div>
+                          
+                          {selectedDish ? (
+                            <div className="relative group">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="secondary"
+                                    className="w-full h-auto p-3 text-left justify-start transition-all"
+                                    onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                                  >
+                                    <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedDish}</span>
+                                  </Button>
+                                </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-sm">
+                                <div className="space-y-1">
+                                  <p className="font-semibold text-sm">Ingredientes:</p>
+                                  {DISH_INGREDIENTS[selectedDish] ? (
+                                    <ul className="text-xs space-y-0.5">
+                                      {Object.entries(DISH_INGREDIENTS[selectedDish]).map(([ingredient, quantity]) => (
+                                        <li key={ingredient}>• {ingredient}: {quantity}</li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
+                                  )}
+                                </div>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveMeal(day, mealKey as MealType);
+                                }}
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                          <Button 
+                            variant="outline"
+                            className="w-full h-auto p-3 text-left justify-start"
+                            onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                          >
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Plus className="w-4 h-4" />
+                              <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
+                            </div>
+                          </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
       {selectedSlot && (

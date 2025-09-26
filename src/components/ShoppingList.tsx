@@ -361,6 +361,11 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
                       {day}
                     </DropdownMenuItem>
                   ))}
+                  {DAYS.map(day => (
+                    <DropdownMenuItem key={`${day}-semana2`} onClick={() => setSelectedDay(`${day} - Semana 2`)}>
+                      {day} - Semana 2
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
               <span className="text-sm text-muted-foreground">
