@@ -284,7 +284,37 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
     
     // Categories and ingredients
     Object.entries(ingredientsByCategory).forEach(([category, ingredients]) => {
-      if (Object.keys(ingredients).length === 0) return;
+      if (Object.keys(ingredients).length === 0) 
+        return (
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-warm rounded-full">
+                  <ShoppingCart className="w-5 h-5 text-white" />
+                </div>
+                Lista de Compras
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                {totalCount > 0 && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={downloadPDF}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Descargar PDF
+                    </Button>
+                    <Badge variant="secondary" className="text-sm">
+                      {checkedCount}/{totalCount} completados
+                    </Badge>
+                  </>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+        );
       
       // Category title
       doc.setFontSize(14);
