@@ -286,34 +286,90 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
     Object.entries(ingredientsByCategory).forEach(([category, ingredients]) => {
       if (Object.keys(ingredients).length === 0) 
         return (
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <div className="p-2 bg-gradient-warm rounded-full">
-                  <ShoppingCart className="w-5 h-5 text-white" />
-                </div>
-                Lista de Compras
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                {totalCount > 0 && (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={downloadPDF}
-                      className="flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      Descargar PDF
+    <Card className="shadow-card">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 bg-gradient-warm rounded-full">
+              <ShoppingCart className="w-5 h-5 text-white" />
+            </div>
+            Lista de Compras
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {totalCount > 0 && (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={downloadPDF}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Descargar PDF
+                </Button>
+                <Badge variant="secondary" className="text-sm">
+                  {checkedCount}/{totalCount} completados
+                </Badge>
+              </>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {totalCount === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            Agrega platos al calendario para generar tu lista de compras
+          </p>
+        ) : (
+          <div className="space-y-6">
+            {/* Day and Week Filters */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      {selectedDay === "cualquiera" ? "Cualquiera" : selectedDay}
+                      <ChevronDown className="w-4 h-4" />
                     </Button>
-                    <Badge variant="secondary" className="text-sm">
-                      {checkedCount}/{totalCount} completados
-                    </Badge>
-                  </>
-                )}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setSelectedDay("cualquiera")}>
+                      Cualquiera
+                    </DropdownMenuItem>
+                    {DAYS.map(day => (
+                      <DropdownMenuItem key={day} onClick={() => setSelectedDay(day)}>
+                        {day}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <span className="text-sm text-muted-foreground">
+                  Seleccionar día específico
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <span className="text-sm font-medium">Semanas:</span>
+                <RadioGroup 
+                  value={selectedWeeks} 
+                  onValueChange={setSelectedWeeks}
+                  className="flex flex-row gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="semana1" id="semana1" />
+                    <Label htmlFor="semana1" className="text-sm">Semana 1</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="semana2" id="semana2" />
+                    <Label htmlFor="semana2" className="text-sm">Semana 2</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ambas" id="ambas" />
+                    <Label htmlFor="ambas" className="text-sm">Ambas</Label>
+                  </div>
+                </RadioGroup>
               </div>
             </div>
-          </CardHeader>
         );
       
       // Category title
