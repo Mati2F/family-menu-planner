@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 // Sample ingredients data with quantities - in a real app this would come from a database
 const DISH_INGREDIENTS: { [key: string]: { [ingredient: string]: string } } = {
@@ -177,6 +179,7 @@ interface ShoppingListProps {
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [selectedDay, setSelectedDay] = useState<string>("cualquiera");
+  const [selectedWeeks, setSelectedWeeks] = useState<string>("ambas");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -185,8 +188,15 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const allIngredients: { [ingredient: string]: string[] } = {};
   
   Object.entries(selectedMeals).forEach(([day, dayMeals]) => {
-    // If a specific day is selected, only process that day
-    if (selectedDay !== "cualquiera" && day !== selectedDay) return;
+    // Filter by selected day
+    if (selectedDay !== "cualquiera") {
+      const dayWithoutWeek = day.includes(" - Semana 2") ? day.replace(" - Semana 2", "") : day;
+      if (dayWithoutWeek !== selectedDay) return;
+    }
+    
+    // Filter by selected weeks
+    if (selectedWeeks === "semana1" && day.includes(" - Semana 2")) return;
+    if (selectedWeeks === "semana2" && !day.includes(" - Semana 2")) return;
     
     Object.values(dayMeals).forEach(dish => {
       if (dish && DISH_INGREDIENTS[dish]) {
@@ -343,34 +353,53 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
           </p>
         ) : (
           <div className="space-y-6">
-            {/* Day Filter */}
-            <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    {selectedDay === "cualquiera" ? "Cualquiera" : selectedDay}
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setSelectedDay("cualquiera")}>
-                    Cualquiera
-                  </DropdownMenuItem>
-                  {DAYS.map(day => (
-                    <DropdownMenuItem key={day} onClick={() => setSelectedDay(day)}>
-                      {day}
+            {/* Day and Week Filters */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      {selectedDay === "cualquiera" ? "Cualquiera" : selectedDay}
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setSelectedDay("cualquiera")}>
+                      Cualquiera
                     </DropdownMenuItem>
-                  ))}
-                  {DAYS.map(day => (
-                    <DropdownMenuItem key={`${day}-semana2`} onClick={() => setSelectedDay(`${day} - Semana 2`)}>
-                      {day} - Semana 2
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <span className="text-sm text-muted-foreground">
-                Haga click para seleccionar los ingredientes de un día específico
-              </span>
+                    {DAYS.map(day => (
+                      <DropdownMenuItem key={day} onClick={() => setSelectedDay(day)}>
+                        {day}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <span className="text-sm text-muted-foreground">
+                  Seleccionar día específico
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <span className="text-sm font-medium">Semanas:</span>
+                <RadioGroup 
+                  value={selectedWeeks} 
+                  onValueChange={setSelectedWeeks}
+                  className="flex flex-row gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="semana1" id="semana1" />
+                    <Label htmlFor="semana1" className="text-sm">Semana 1</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="semana2" id="semana2" />
+                    <Label htmlFor="semana2" className="text-sm">Semana 2</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ambas" id="ambas" />
+                    <Label htmlFor="ambas" className="text-sm">Ambas</Label>
+                  </div>
+                </RadioGroup>
+              </div>
             </div>
 
             {/* Ingredients by Category */}
