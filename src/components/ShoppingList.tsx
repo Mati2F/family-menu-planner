@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Check, Download, ChevronDown } from "lucide-react";
+import { ShoppingCart, Check, Download, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import jsPDF from "jspdf";
@@ -81,6 +81,28 @@ const sumQuantities = (quantities: string[]): string => {
   // Handle special cases first
   if (quantities.some((q) => q.trim() === 'al gusto')) return 'al gusto';
 
+  // Handle non-numeric descriptive quantities
+  const descriptiveQuantities = quantities.filter(q => {
+    const trimmed = q.trim().toLowerCase();
+    return trimmed.includes('hojas') || trimmed.includes('ramitas') || trimmed.includes('manojo') || 
+           trimmed === 'hojas frescas' || trimmed === 'ramitas frescas' || 
+           /^hojas?$/.test(trimmed) || /^ramitas?$/.test(trimmed);
+  });
+
+  if (descriptiveQuantities.length > 0) {
+    const first = descriptiveQuantities[0].trim().toLowerCase();
+    if (first.includes('hoja') || first === 'hojas' || first === 'hoja') {
+      return 'hojas frescas';
+    }
+    if (first.includes('ramita') || first === 'ramitas' || first === 'ramita') {
+      return 'ramitas frescas';  
+    }
+    if (first.includes('manojo')) {
+      return 'manojo';
+    }
+    return first;
+  }
+
   // Helper to parse a quantity string into numeric value and unit
   const parseQty = (raw: string): { value: number; unit: string } => {
     const qty = raw.trim();
@@ -155,6 +177,7 @@ interface ShoppingListProps {
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [selectedDay, setSelectedDay] = useState<string>("cualquiera");
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
@@ -220,6 +243,16 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
 
   const checkedCount = checkedItems.size;
   const totalCount = totalIngredients;
+
+  const toggleCategory = (category: string) => {
+    const newCollapsed = new Set(collapsedCategories);
+    if (newCollapsed.has(category)) {
+      newCollapsed.delete(category);
+    } else {
+      newCollapsed.add(category);
+    }
+    setCollapsedCategories(newCollapsed);
+  };
 
   const downloadPDF = () => {
     const doc = new jsPDF();
@@ -339,42 +372,60 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             {Object.entries(ingredientsByCategory).map(([category, ingredients]) => {
               if (Object.keys(ingredients).length === 0) return null;
               
+              const isCollapsed = collapsedCategories.has(category);
+              
               return (
                 <div key={category}>
-                  <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary"></div>
-                    {category}
-                  </h4>
-                  <div className="space-y-2 ml-4">
-                    {Object.entries(ingredients).map(([ingredient, quantity]) => {
-                      const isChecked = checkedItems.has(ingredient);
-                      
-                      return (
-                        <Button
-                          key={ingredient}
-                          variant="ghost"
-                          className={`w-full justify-start h-auto p-3 ${
-                            isChecked ? 'opacity-60 line-through' : ''
-                          }`}
-                          onClick={() => toggleItem(ingredient)}
-                        >
-                          <div className="flex items-center gap-3 w-full">
-                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                              isChecked 
-                                ? 'bg-primary border-primary' 
-                                : 'border-muted-foreground/30'
-                            }`}>
-                              {isChecked && <Check className="w-3 h-3 text-white" />}
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-auto p-3 mb-2"
+                    onClick={() => toggleCategory(category)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isCollapsed ? (
+                        <ChevronRight className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
+                      <h4 className="font-semibold text-foreground">
+                        {category}
+                      </h4>
+                    </div>
+                  </Button>
+                  
+                  {!isCollapsed && (
+                    <div className="space-y-2 ml-4">
+                      {Object.entries(ingredients).map(([ingredient, quantity]) => {
+                        const isChecked = checkedItems.has(ingredient);
+                        
+                        return (
+                          <Button
+                            key={ingredient}
+                            variant="ghost"
+                            className={`w-full justify-start h-auto p-3 ${
+                              isChecked ? 'opacity-60 line-through' : ''
+                            }`}
+                            onClick={() => toggleItem(ingredient)}
+                          >
+                            <div className="flex items-center gap-3 w-full">
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                                isChecked 
+                                  ? 'bg-primary border-primary' 
+                                  : 'border-muted-foreground/30'
+                              }`}>
+                                {isChecked && <Check className="w-3 h-3 text-white" />}
+                              </div>
+                              <div className="flex-1 text-left">
+                                <div className="font-medium">{ingredient}</div>
+                                <div className="text-sm text-muted-foreground">{quantity}</div>
+                              </div>
                             </div>
-                            <div className="flex-1 text-left">
-                              <div className="font-medium">{ingredient}</div>
-                              <div className="text-sm text-muted-foreground">{quantity}</div>
-                            </div>
-                          </div>
-                        </Button>
-                      );
-                    })}
-                  </div>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
