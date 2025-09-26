@@ -39,11 +39,14 @@ const SAMPLE_DISHES = {
 };
 
 const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const WEEK_1_DAYS = DAYS.map(day => day);
+const WEEK_2_DAYS = DAYS.map(day => `${day} - Semana 2`);
 
-const generateRandomMeals = (): MealData => {
+const generateRandomMealsTwoWeeks = (): MealData => {
   const randomMeals: MealData = {};
-  
-  DAYS.forEach(day => {
+  const allDays = [...WEEK_1_DAYS, ...WEEK_2_DAYS];
+
+  allDays.forEach(day => {
     randomMeals[day] = {};
     Object.keys(SAMPLE_DISHES).forEach(mealKey => {
       const mealType = mealKey as keyof typeof SAMPLE_DISHES;
@@ -62,7 +65,7 @@ const Index = () => {
 
   const handleModeSelect = (mode: 'manual' | 'random') => {
     if (mode === 'random') {
-      const randomMeals = generateRandomMeals();
+      const randomMeals = generateRandomMealsTwoWeeks();
       setSelectedMeals(randomMeals);
     }
     setCurrentMode('app');

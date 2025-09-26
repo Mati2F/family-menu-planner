@@ -17,10 +17,6 @@ export const AppHeader = () => {
           
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>Esta semana</span>
-            </div>
-            <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               <span>Para toda la familia</span>
             </div>
