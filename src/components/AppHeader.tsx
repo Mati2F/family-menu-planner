@@ -10,15 +10,12 @@ export const AppHeader = () => {
               <ChefHat className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Menú Familiar</h1>
-              <p className="text-muted-foreground">Planifica tus comidas semanales</p>
-            </div>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              <span>Para toda la familia</span>
+              <h1 className="text-2xl font-bold text-foreground">
+                Menú Familiar
+              </h1>
+              <p className="text-muted-foreground">
+                Planifica tus comidas semanales
+              </p>
             </div>
           </div>
         </div>

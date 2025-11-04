@@ -1,6 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Check, Download, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  ShoppingCart,
+  Check,
+  Download,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import jsPDF from "jspdf";
@@ -15,65 +21,216 @@ import { Label } from "@/components/ui/label";
 
 // Sample ingredients data with quantities - in a real app this would come from a database
 const DISH_INGREDIENTS: { [key: string]: { [ingredient: string]: string } } = {
-  "Tostadas con Palta": {"Pan integral": "4 rebanadas", "Palta": "2 unidades", "Tomate": "1 unidad", "Sal": "al gusto", "Limón": "1/2 unidad"},
-  "Huevos Revueltos": {"Huevos": "6 unidades", "Leche": "1/2 taza", "Mantequilla": "2 cucharadas", "Sal": "al gusto", "Pimienta": "al gusto"},
-  "Pancakes": {"Harina": "2 tazas", "Huevos": "2 unidades", "Leche": "1 1/2 tazas", "Azúcar": "2 cucharadas", "Polvo de hornear": "2 cucharaditas", "Mantequilla": "3 cucharadas"},
-  "Pollo al Horno con Papas": {"Pollo entero": "1 unidad", "Papa": "1 kg", "Cebolla": "2 unidades", "Ajo": "4 dientes", "Aceite de oliva": "3 cucharadas", "Romero": "2 ramas"},
-  "Pasta con Salsa de Tomate": {"Pasta": "500g", "Tomate en lata": "1 lata", "Ajo": "3 dientes", "Cebolla": "1 unidad", "Albahaca": "hojas frescas", "Aceite de oliva": "2 cucharadas"},
-  "Salmón a la Plancha": {"Salmón": "4 filetes", "Limón": "2 unidades", "Aceite de oliva": "2 cucharadas", "Sal": "al gusto", "Pimienta": "al gusto", "Eneldo": "ramitas frescas"},
-  "Pizza Casera": {"Harina": "3 tazas", "Levadura": "1 sobre", "Salsa de tomate": "1/2 taza", "Queso mozzarella": "200g", "Aceite de oliva": "2 cucharadas"},
-  "Ensalada César": {"Lechuga romana": "2 cabezas", "Queso parmesano": "100g", "Pan": "4 rebanadas", "Ajo": "2 dientes", "Limón": "1 unidad", "Aceite de oliva": "3 cucharadas"},
-  "Arroz con Verduras": {"Arroz": "2 tazas", "Zanahoria": "2 unidades", "Arveja": "1 taza", "Cebolla": "1 unidad", "Ajo": "2 dientes", "Caldo de verduras": "4 tazas"},
-  "Avena con Frutas": {"Avena": "1 taza", "Leche": "2 tazas", "Manzana": "2 unidades", "Banana": "2 unidades", "Miel": "2 cucharadas", "Canela": "1 cucharadita"},
-  "Yogurt con Granola": {"Yogurt natural": "2 tazas", "Granola": "1/2 taza", "Miel": "2 cucharadas", "Fruta del bosque": "1 taza"},
-  "Sándwich de Atún": {"Pan": "8 rebanadas", "Atún en lata": "2 latas", "Mayonesa": "3 cucharadas", "Lechuga": "hojas", "Tomate": "2 unidades"},
-  "Sopa de Lentejas": {"Lenteja": "2 tazas", "Zanahoria": "3 unidades", "Cebolla": "1 unidad", "Apio": "2 tallos", "Ajo": "3 dientes", "Caldo de verduras": "6 tazas"},
-  "Ensalada de Quinoa": {"Quinoa": "1 1/2 tazas", "Pepino": "2 unidades", "Tomate": "3 unidades", "Cebolla morada": "1/2 unidad", "Limón": "2 unidades", "Aceite de oliva": "3 cucharadas"},
-  "Tacos de Pollo": {"Tortilla": "8 unidades", "Pollo": "500g", "Cebolla": "1 unidad", "Pimiento": "2 unidades", "Limón": "2 unidades", "Cilantro": "1 manojo"},
-  "Sopa de Verduras": {"Zanahoria": "2 unidades", "Calabacín": "2 unidades", "Cebolla": "1 unidad", "Apio": "2 tallos", "Tomate": "2 unidades", "Caldo de verduras": "6 tazas"},
-  "Milanesas con Puré": {"Carne para milanesas": "8 unidades", "Pan rallado": "2 tazas", "Huevos": "3 unidades", "Papa": "1 kg", "Leche": "1/2 taza", "Mantequilla": "3 cucharadas"}
+  "Tostadas con Palta": {
+    "Pan integral": "4 rebanadas",
+    Palta: "2 unidades",
+    Tomate: "1 unidad",
+    Sal: "al gusto",
+    Limón: "1/2 unidad",
+  },
+  "Huevos Revueltos": {
+    Huevos: "6 unidades",
+    Leche: "1/2 taza",
+    Mantequilla: "2 cucharadas",
+    Sal: "al gusto",
+    Pimienta: "al gusto",
+  },
+  Pancakes: {
+    Harina: "2 tazas",
+    Huevos: "2 unidades",
+    Leche: "1 1/2 tazas",
+    Azúcar: "2 cucharadas",
+    "Polvo de hornear": "2 cucharaditas",
+    Mantequilla: "3 cucharadas",
+  },
+  "Pollo al Horno con Papas": {
+    "Pollo entero": "1 unidad",
+    Papa: "1 kg",
+    Cebolla: "2 unidades",
+    Ajo: "4 dientes",
+    "Aceite de oliva": "3 cucharadas",
+    Romero: "2 ramas",
+  },
+  "Pasta con Salsa de Tomate": {
+    Pasta: "500g",
+    "Tomate en lata": "1 lata",
+    Ajo: "3 dientes",
+    Cebolla: "1 unidad",
+    Albahaca: "hojas frescas",
+    "Aceite de oliva": "2 cucharadas",
+  },
+  "Salmón a la Plancha": {
+    Salmón: "4 filetes",
+    Limón: "2 unidades",
+    "Aceite de oliva": "2 cucharadas",
+    Sal: "al gusto",
+    Pimienta: "al gusto",
+    Eneldo: "ramitas frescas",
+  },
+  "Pizza Casera": {
+    Harina: "3 tazas",
+    Levadura: "1 sobre",
+    "Salsa de tomate": "1/2 taza",
+    "Queso mozzarella": "200g",
+    "Aceite de oliva": "2 cucharadas",
+  },
+  "Ensalada César": {
+    "Lechuga romana": "2 cabezas",
+    "Queso parmesano": "100g",
+    Pan: "4 rebanadas",
+    Ajo: "2 dientes",
+    Limón: "1 unidad",
+    "Aceite de oliva": "3 cucharadas",
+  },
+  "Arroz con Verduras": {
+    Arroz: "2 tazas",
+    Zanahoria: "2 unidades",
+    Arveja: "1 taza",
+    Cebolla: "1 unidad",
+    Ajo: "2 dientes",
+    "Caldo de verduras": "4 tazas",
+  },
+  "Avena con Frutas": {
+    Avena: "1 taza",
+    Leche: "2 tazas",
+    Manzana: "2 unidades",
+    Banana: "2 unidades",
+    Miel: "2 cucharadas",
+    Canela: "1 cucharadita",
+  },
+  "Yogurt con Granola": {
+    "Yogurt natural": "2 tazas",
+    Granola: "1/2 taza",
+    Miel: "2 cucharadas",
+    "Fruta del bosque": "1 taza",
+  },
+  "Sándwich de Atún": {
+    Pan: "8 rebanadas",
+    "Atún en lata": "2 latas",
+    Mayonesa: "3 cucharadas",
+    Lechuga: "hojas",
+    Tomate: "2 unidades",
+  },
+  "Sopa de Lentejas": {
+    Lenteja: "2 tazas",
+    Zanahoria: "3 unidades",
+    Cebolla: "1 unidad",
+    Apio: "2 tallos",
+    Ajo: "3 dientes",
+    "Caldo de verduras": "6 tazas",
+  },
+  "Ensalada de Quinoa": {
+    Quinoa: "1 1/2 tazas",
+    Pepino: "2 unidades",
+    Tomate: "3 unidades",
+    "Cebolla morada": "1/2 unidad",
+    Limón: "2 unidades",
+    "Aceite de oliva": "3 cucharadas",
+  },
+  "Tacos de Pollo": {
+    Tortilla: "8 unidades",
+    Pollo: "500g",
+    Cebolla: "1 unidad",
+    Pimiento: "2 unidades",
+    Limón: "2 unidades",
+    Cilantro: "1 manojo",
+  },
+  "Sopa de Verduras": {
+    Zanahoria: "2 unidades",
+    Calabacín: "2 unidades",
+    Cebolla: "1 unidad",
+    Apio: "2 tallos",
+    Tomate: "2 unidades",
+    "Caldo de verduras": "6 tazas",
+  },
+  "Milanesas con Puré": {
+    "Carne para milanesas": "8 unidades",
+    "Pan rallado": "2 tazas",
+    Huevos: "3 unidades",
+    Papa: "1 kg",
+    Leche: "1/2 taza",
+    Mantequilla: "3 cucharadas",
+  },
 };
 
 // Ingredient categories
 const INGREDIENT_CATEGORIES = {
-  "Proteínas": [
-    "Pollo entero", "Pollo", "Salmón", "Huevos", "Carne para milanesas", "Atún en lata", "Lenteja", "Quinoa"
+  Proteínas: [
+    "Pollo entero",
+    "Pollo",
+    "Salmón",
+    "Huevos",
+    "Carne para milanesas",
+    "Atún en lata",
+    "Lenteja",
+    "Quinoa",
   ],
-  "Lácteos": [
-    "Leche", "Mantequilla", "Queso mozzarella", "Queso parmesano", "Yogurt natural"
+  Lácteos: [
+    "Leche",
+    "Mantequilla",
+    "Queso mozzarella",
+    "Queso parmesano",
+    "Yogurt natural",
   ],
-  "Verduras": [
-    "Papa", "Tomate", "Cebolla", "Ajo", "Zanahoria", "Arveja", "Lechuga", "Lechuga romana", 
-    "Pepino", "Cebolla morada", "Pimiento", "Calabacín", "Apio", "Palta"
+  Verduras: [
+    "Papa",
+    "Tomate",
+    "Cebolla",
+    "Ajo",
+    "Zanahoria",
+    "Arveja",
+    "Lechuga",
+    "Lechuga romana",
+    "Pepino",
+    "Cebolla morada",
+    "Pimiento",
+    "Calabacín",
+    "Apio",
+    "Palta",
   ],
-  "Frutas": [
-    "Manzana", "Banana", "Limón", "Fruta del bosque"
-  ],
+  Frutas: ["Manzana", "Banana", "Limón", "Fruta del bosque"],
   "Granos y Cereales": [
-    "Pan integral", "Pan", "Harina", "Pasta", "Arroz", "Avena", "Granola", "Pan rallado", "Tortilla"
+    "Pan integral",
+    "Pan",
+    "Harina",
+    "Pasta",
+    "Arroz",
+    "Avena",
+    "Granola",
+    "Pan rallado",
+    "Tortilla",
   ],
   "Condimentos y Especias": [
-    "Sal", "Pimienta", "Romero", "Albahaca", "Eneldo", "Miel", "Canela", "Cilantro"
+    "Sal",
+    "Pimienta",
+    "Romero",
+    "Albahaca",
+    "Eneldo",
+    "Miel",
+    "Canela",
+    "Cilantro",
   ],
-  "Aceites y Salsas": [
-    "Aceite de oliva", "Mayonesa", "Salsa de tomate"
+  "Aceites y Salsas": ["Aceite de oliva", "Mayonesa", "Salsa de tomate"],
+  Otros: [
+    "Azúcar",
+    "Polvo de hornear",
+    "Levadura",
+    "Caldo de verduras",
+    "Tomate en lata",
   ],
-  "Otros": [
-    "Azúcar", "Polvo de hornear", "Levadura", "Caldo de verduras", "Tomate en lata"
-  ]
 };
 
 // Function to normalize ingredient names
 const normalizeIngredient = (ingredient: string): string => {
   const normalizations: { [key: string]: string } = {
-    "tomates": "tomate",
-    "papas": "papa", 
-    "arvejas": "arveja",
-    "lentejas": "lenteja",
-    "tortillas": "tortilla",
-    "frutas del bosque": "fruta del bosque"
+    tomates: "tomate",
+    papas: "papa",
+    arvejas: "arveja",
+    lentejas: "lenteja",
+    tortillas: "tortilla",
+    "frutas del bosque": "fruta del bosque",
   };
-  
+
   const lower = ingredient.toLowerCase();
   return normalizations[lower] || ingredient;
 };
@@ -81,26 +238,32 @@ const normalizeIngredient = (ingredient: string): string => {
 // Function to sum quantities numerically
 const sumQuantities = (quantities: string[]): string => {
   // Handle special cases first
-  if (quantities.some((q) => q.trim() === 'al gusto')) return 'al gusto';
+  if (quantities.some((q) => q.trim() === "al gusto")) return "al gusto";
 
   // Handle non-numeric descriptive quantities
-  const descriptiveQuantities = quantities.filter(q => {
+  const descriptiveQuantities = quantities.filter((q) => {
     const trimmed = q.trim().toLowerCase();
-    return trimmed.includes('hojas') || trimmed.includes('ramitas') || trimmed.includes('manojo') || 
-           trimmed === 'hojas frescas' || trimmed === 'ramitas frescas' || 
-           /^hojas?$/.test(trimmed) || /^ramitas?$/.test(trimmed);
+    return (
+      trimmed.includes("hojas") ||
+      trimmed.includes("ramitas") ||
+      trimmed.includes("manojo") ||
+      trimmed === "hojas frescas" ||
+      trimmed === "ramitas frescas" ||
+      /^hojas?$/.test(trimmed) ||
+      /^ramitas?$/.test(trimmed)
+    );
   });
 
   if (descriptiveQuantities.length > 0) {
     const first = descriptiveQuantities[0].trim().toLowerCase();
-    if (first.includes('hoja') || first === 'hojas' || first === 'hoja') {
-      return 'hojas frescas';
+    if (first.includes("hoja") || first === "hojas" || first === "hoja") {
+      return "hojas frescas";
     }
-    if (first.includes('ramita') || first === 'ramitas' || first === 'ramita') {
-      return 'ramitas frescas';  
+    if (first.includes("ramita") || first === "ramitas" || first === "ramita") {
+      return "ramitas frescas";
     }
-    if (first.includes('manojo')) {
-      return 'manojo';
+    if (first.includes("manojo")) {
+      return "manojo";
     }
     return first;
   }
@@ -115,7 +278,7 @@ const sumQuantities = (quantities: string[]): string => {
       const whole = parseFloat(m[1]);
       const num = parseFloat(m[2]);
       const den = parseFloat(m[3]);
-      const unit = (m[4] || '').trim();
+      const unit = (m[4] || "").trim();
       return { value: whole + num / den, unit };
     }
 
@@ -124,22 +287,22 @@ const sumQuantities = (quantities: string[]): string => {
     if (m) {
       const num = parseFloat(m[1]);
       const den = parseFloat(m[2]);
-      const unit = (m[3] || '').trim();
+      const unit = (m[3] || "").trim();
       return { value: num / den, unit };
     }
 
     // Decimal or integer: "2.5 unidades" o "2 unidades"
     m = qty.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
     if (m) {
-      const unit = (m[2] || '').trim();
+      const unit = (m[2] || "").trim();
       return { value: parseFloat(m[1]), unit };
     }
 
-    return { value: 0, unit: '' };
+    return { value: 0, unit: "" };
   };
 
   // Sum numeric values and keep the first non-empty unit
-  let unit = '';
+  let unit = "";
   const total = quantities.reduce((sum, q) => {
     const { value, unit: u } = parseQty(q);
     if (!unit && u) unit = u;
@@ -170,43 +333,59 @@ const sumQuantities = (quantities: string[]): string => {
   }
 
   // If nothing was parsed, return the raw list
-  return quantities.join(', ');
+  return quantities.join(", ");
 };
 interface ShoppingListProps {
-  selectedMeals: { [key: string]: { breakfast?: string; lunch?: string; dinner?: string } };
+  selectedMeals: {
+    [key: string]: { breakfast?: string; lunch?: string; dinner?: string };
+  };
 }
 
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
-  const [selectedDay, setSelectedDay] = useState<string>("cualquiera");
+  const [selectedDay, setSelectedDay] = useState<string>("Toda la semana");
   const [selectedWeeks, setSelectedWeeks] = useState<string>("ambas");
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    new Set()
+  );
 
-  const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+  const DAYS = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
+  ];
 
   // Collect all ingredients from all days with their quantities
   const allIngredients: { [ingredient: string]: string[] } = {};
-  
+
   Object.entries(selectedMeals).forEach(([day, dayMeals]) => {
     // Filter by selected day
-    if (selectedDay !== "cualquiera") {
-      const dayWithoutWeek = day.includes(" - Semana 2") ? day.replace(" - Semana 2", "") : day;
+    if (selectedDay !== "Toda la semana") {
+      const dayWithoutWeek = day.includes(" - Semana 2")
+        ? day.replace(" - Semana 2", "")
+        : day;
       if (dayWithoutWeek !== selectedDay) return;
     }
-    
+
     // Filter by selected weeks
     if (selectedWeeks === "semana1" && day.includes(" - Semana 2")) return;
     if (selectedWeeks === "semana2" && !day.includes(" - Semana 2")) return;
-    
-    Object.values(dayMeals).forEach(dish => {
+
+    Object.values(dayMeals).forEach((dish) => {
       if (dish && DISH_INGREDIENTS[dish]) {
-        Object.entries(DISH_INGREDIENTS[dish]).forEach(([ingredient, quantity]) => {
-          const normalizedIngredient = normalizeIngredient(ingredient);
-          if (!allIngredients[normalizedIngredient]) {
-            allIngredients[normalizedIngredient] = [];
+        Object.entries(DISH_INGREDIENTS[dish]).forEach(
+          ([ingredient, quantity]) => {
+            const normalizedIngredient = normalizeIngredient(ingredient);
+            if (!allIngredients[normalizedIngredient]) {
+              allIngredients[normalizedIngredient] = [];
+            }
+            allIngredients[normalizedIngredient].push(quantity);
           }
-          allIngredients[normalizedIngredient].push(quantity);
-        });
+        );
       }
     });
   });
@@ -218,21 +397,27 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   });
 
   // Group ingredients by category
-  const ingredientsByCategory: { [category: string]: { [ingredient: string]: string } } = {};
-  
+  const ingredientsByCategory: {
+    [category: string]: { [ingredient: string]: string };
+  } = {};
+
   Object.entries(consolidatedIngredients).forEach(([ingredient, quantity]) => {
     let category = "Otros";
-    
+
     // Find the category for this ingredient
     for (const [cat, ingredients] of Object.entries(INGREDIENT_CATEGORIES)) {
-      if (ingredients.some(catIngredient => 
-        normalizeIngredient(catIngredient).toLowerCase() === ingredient.toLowerCase()
-      )) {
+      if (
+        ingredients.some(
+          (catIngredient) =>
+            normalizeIngredient(catIngredient).toLowerCase() ===
+            ingredient.toLowerCase()
+        )
+      ) {
         category = cat;
         break;
       }
     }
-    
+
     if (!ingredientsByCategory[category]) {
       ingredientsByCategory[category] = {};
     }
@@ -266,55 +451,54 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    
+
     // Title
     doc.setFontSize(20);
     doc.text("Lista de Compras", 20, 30);
-    
+
     // Date
     doc.setFontSize(12);
-    doc.text(`Generada el: ${new Date().toLocaleDateString('es-ES')}`, 20, 45);
-    
+    doc.text(`Generada el: ${new Date().toLocaleDateString("es-ES")}`, 20, 45);
+
     // Selected day filter
-    if (selectedDay !== "cualquiera") {
+    if (selectedDay !== "Toda la semana") {
       doc.text(`Día seleccionado: ${selectedDay}`, 20, 55);
     }
-    
-    let yPosition = selectedDay !== "cualquiera" ? 75 : 65;
-    
+
+    let yPosition = selectedDay !== "Toda la semana" ? 75 : 65;
+
     // Categories and ingredients
     Object.entries(ingredientsByCategory).forEach(([category, ingredients]) => {
-      if (Object.keys(ingredients).length === 0) 
-        return;
-      
+      if (Object.keys(ingredients).length === 0) return;
+
       // Category title
       doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
+      doc.setFont(undefined, "bold");
       doc.text(category, 20, yPosition);
       yPosition += 10;
-      
+
       // Ingredients for this category
       doc.setFontSize(11);
-      doc.setFont(undefined, 'normal');
+      doc.setFont(undefined, "normal");
       Object.entries(ingredients).forEach(([ingredient, quantity]) => {
         const isChecked = checkedItems.has(ingredient);
-        const checkbox = isChecked ? '☑' : '☐';
-        
+        const checkbox = isChecked ? "☑" : "☐";
+
         doc.text(`${checkbox} ${ingredient} (${quantity})`, 25, yPosition);
         yPosition += 8;
-        
+
         // Add new page if needed
         if (yPosition > 270) {
           doc.addPage();
           yPosition = 30;
         }
       });
-      
+
       yPosition += 5; // Space between categories
     });
-    
+
     // Save the PDF
-    doc.save('lista-de-compras.pdf');
+    doc.save("lista-de-compras.pdf");
   };
 
   return (
@@ -330,8 +514,8 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
           <div className="flex items-center gap-2">
             {totalCount > 0 && (
               <>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={downloadPDF}
                   className="flex items-center gap-2"
@@ -348,62 +532,76 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
         </div>
       </CardHeader>
       <CardContent>
-          <div className="space-y-6">
-            {/* Day and Week Filters */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="flex items-center gap-2">
-                      {selectedDay === "cualquiera" ? "Cualquiera" : selectedDay}
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => setSelectedDay("cualquiera")}>
-                      Cualquiera
+        <div className="space-y-6">
+          {/* Day and Week Filters */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    {selectedDay === "Toda la semana"
+                      ? "Toda la semana"
+                      : selectedDay}
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={() => setSelectedDay("Toda la semana")}
+                  >
+                    Toda la semana
+                  </DropdownMenuItem>
+                  {DAYS.map((day) => (
+                    <DropdownMenuItem
+                      key={day}
+                      onClick={() => setSelectedDay(day)}
+                    >
+                      {day}
                     </DropdownMenuItem>
-                    {DAYS.map(day => (
-                      <DropdownMenuItem key={day} onClick={() => setSelectedDay(day)}>
-                        {day}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <span className="text-sm text-muted-foreground">
-                  Seleccionar día específico
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-6">
-                <span className="text-sm font-medium">Semanas:</span>
-                <RadioGroup 
-                  value={selectedWeeks} 
-                  onValueChange={setSelectedWeeks}
-                  className="flex flex-row gap-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="semana1" id="semana1" />
-                    <Label htmlFor="semana1" className="text-sm">Semana 1</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="semana2" id="semana2" />
-                    <Label htmlFor="semana2" className="text-sm">Semana 2</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ambas" id="ambas" />
-                    <Label htmlFor="ambas" className="text-sm">Ambas</Label>
-                  </div>
-                </RadioGroup>
-              </div>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <span className="text-sm text-muted-foreground">
+                Seleccionar día específico
+              </span>
             </div>
 
-            {/* Ingredients by Category */}
-            {Object.entries(ingredientsByCategory).map(([category, ingredients]) => {
+            <div className="flex items-center gap-6">
+              <span className="text-sm font-medium">Semanas:</span>
+              <RadioGroup
+                value={selectedWeeks}
+                onValueChange={setSelectedWeeks}
+                className="flex flex-row gap-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="semana1" id="semana1" />
+                  <Label htmlFor="semana1" className="text-sm">
+                    Semana 1
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="semana2" id="semana2" />
+                  <Label htmlFor="semana2" className="text-sm">
+                    Semana 2
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="ambas" id="ambas" />
+                  <Label htmlFor="ambas" className="text-sm">
+                    Ambas
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+
+          {/* Ingredients by Category */}
+          {Object.entries(ingredientsByCategory).map(
+            ([category, ingredients]) => {
               if (Object.keys(ingredients).length === 0) return null;
-              
+
               const isCollapsed = collapsedCategories.has(category);
-              
+
               return (
                 <div key={category}>
                   <Button
@@ -423,44 +621,54 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
                       </h4>
                     </div>
                   </Button>
-                  
+
                   {!isCollapsed && (
                     <div className="space-y-2 ml-4">
-                      {Object.entries(ingredients).map(([ingredient, quantity]) => {
-                        const isChecked = checkedItems.has(ingredient);
-                        
-                        return (
-                          <Button
-                            key={ingredient}
-                            variant="ghost"
-                            className={`w-full justify-start h-auto p-3 ${
-                              isChecked ? 'opacity-60 line-through' : ''
-                            }`}
-                            onClick={() => toggleItem(ingredient)}
-                          >
-                            <div className="flex items-center gap-3 w-full">
-                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                                isChecked 
-                                  ? 'bg-primary border-primary' 
-                                  : 'border-muted-foreground/30'
-                              }`}>
-                                {isChecked && <Check className="w-3 h-3 text-white" />}
+                      {Object.entries(ingredients).map(
+                        ([ingredient, quantity]) => {
+                          const isChecked = checkedItems.has(ingredient);
+
+                          return (
+                            <Button
+                              key={ingredient}
+                              variant="ghost"
+                              className={`w-full justify-start h-auto p-3 ${
+                                isChecked ? "opacity-60 line-through" : ""
+                              }`}
+                              onClick={() => toggleItem(ingredient)}
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div
+                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                                    isChecked
+                                      ? "bg-primary border-primary"
+                                      : "border-muted-foreground/30"
+                                  }`}
+                                >
+                                  {isChecked && (
+                                    <Check className="w-3 h-3 text-white" />
+                                  )}
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div className="font-medium">
+                                    {ingredient}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {quantity}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex-1 text-left">
-                                <div className="font-medium">{ingredient}</div>
-                                <div className="text-sm text-muted-foreground">{quantity}</div>
-                              </div>
-                            </div>
-                          </Button>
-                        );
-                      })}
+                            </Button>
+                          );
+                        }
+                      )}
                     </div>
                   )}
                 </div>
               );
-            })}
-          </div>
-        
+            }
+          )}
+        </div>
       </CardContent>
     </Card>
   );
