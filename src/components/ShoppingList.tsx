@@ -17,9 +17,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CheckboxGroup, CheckboxGroupItem } from "@/components/ui/checkbox-group";
+import {
+  CheckboxGroup,
+  CheckboxGroupItem,
+} from "@/components/ui/checkbox-group";
 import { Label } from "@/components/ui/label";
-
 
 // Sample ingredients data with quantities - in a real app this would come from a database
 const DISH_INGREDIENTS: { [key: string]: { [ingredient: string]: string } } = {
@@ -347,14 +349,14 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [selectedDay, setSelectedDay] = useState<string>("Toda la semana");
   const [filtros, setFiltros] = useState({
-    semana1: true,   
-    semana2: true,   
+    semana1: true,
+    semana2: true,
   });
 
   const handleChange = (key: "semana1" | "semana2") => (checked: boolean) => {
     setFiltros((prev) => ({ ...prev, [key]: checked }));
   };
-  
+
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     new Set()
   );
@@ -523,11 +525,11 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             <div className="p-2 bg-gradient-warm rounded-full">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-              <div className="">
-                <h2 className="text-2xl font-semibold text-foreground mb-2">
-                  Lista de Compras
-                </h2>
-              </div>
+            <div className="">
+              <h2 className="text-2xl font-semibold text-foreground mb-2">
+                Lista de Compras
+              </h2>
+            </div>
           </CardTitle>
           <div className="flex items-center gap-2">
             {totalCount > 0 && (
@@ -548,9 +550,9 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             )}
           </div>
         </div>
-            <p className="text-muted-foreground">
-              Ingredientes necesarios para tus platos seleccionados
-            </p>
+        <p className="text-muted-foreground">
+          Ingredientes necesarios para tus platos seleccionados
+        </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -587,12 +589,11 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-
             </div>
-  
-            <div className="items-center gap-6">
+
+            <div className="flex items-start gap-6">
               <span className=" text-sm font-medium">Semanas:</span>
-              <CheckboxGroup className=" flex-row gap-3 pt-2">
+              <CheckboxGroup className=" flex-col gap-3">
                 <div className=" items-center space-x-2">
                   <CheckboxGroupItem
                     checked={filtros.semana1}
