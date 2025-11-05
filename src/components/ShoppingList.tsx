@@ -17,7 +17,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { CheckboxGroup, CheckboxGroupItem } from "@/components/ui/checkbox-group";
 import { Label } from "@/components/ui/label";
+
 
 // Sample ingredients data with quantities - in a real app this would come from a database
 const DISH_INGREDIENTS: { [key: string]: { [ingredient: string]: string } } = {
@@ -344,7 +346,15 @@ interface ShoppingListProps {
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [selectedDay, setSelectedDay] = useState<string>("Toda la semana");
-  const [selectedWeeks, setSelectedWeeks] = useState<string>("ambas");
+  const [filtros, setFiltros] = useState({
+    semana1: true,   
+    semana2: true,   
+  });
+
+  const handleChange = (key: "semana1" | "semana2") => (checked: boolean) => {
+    setFiltros((prev) => ({ ...prev, [key]: checked }));
+  };
+  
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     new Set()
   );
@@ -371,9 +381,13 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
       if (dayWithoutWeek !== selectedDay) return;
     }
 
-    // Filter by selected weeks
-    if (selectedWeeks === "semana1" && day.includes(" - Semana 2")) return;
-    if (selectedWeeks === "semana2" && !day.includes(" - Semana 2")) return;
+    const isSemana2 = day.includes(" - Semana 2");
+
+    // Si semana1 está desactivada → excluye días sin " - Semana 2"
+    if (!filtros.semana1 && !isSemana2) return;
+
+    // Si semana2 está desactivada → excluye días que sí tienen " - Semana 2"
+    if (!filtros.semana2 && isSemana2) return;
 
     Object.values(dayMeals).forEach((dish) => {
       if (dish && DISH_INGREDIENTS[dish]) {
@@ -509,7 +523,11 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             <div className="p-2 bg-gradient-warm rounded-full">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
-            Lista de Compras
+              <div className="">
+                <h2 className="text-2xl font-semibold text-foreground mb-2">
+                  Lista de Compras
+                </h2>
+              </div>
           </CardTitle>
           <div className="flex items-center gap-2">
             {totalCount > 0 && (
@@ -530,12 +548,20 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
             )}
           </div>
         </div>
+            <p className="text-muted-foreground">
+              Ingredientes necesarios para tus platos seleccionados
+            </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {/* Day and Week Filters */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className=" items-center gap-3 ">
+              <div className="pb-2">
+                <span className="text-sm text-muted-foreground ">
+                  Seleccionar día específico:
+                </span>
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
@@ -561,37 +587,34 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <span className="text-sm text-muted-foreground">
-                Seleccionar día específico
-              </span>
-            </div>
 
-            <div className="flex items-center gap-6">
-              <span className="text-sm font-medium">Semanas:</span>
-              <RadioGroup
-                value={selectedWeeks}
-                onValueChange={setSelectedWeeks}
-                className="flex flex-row gap-6"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="semana1" id="semana1" />
+            </div>
+  
+            <div className="items-center gap-6">
+              <span className=" text-sm font-medium">Semanas:</span>
+              <CheckboxGroup className=" flex-row gap-3 pt-2">
+                <div className=" items-center space-x-2">
+                  <CheckboxGroupItem
+                    checked={filtros.semana1}
+                    onCheckedChange={handleChange("semana1")}
+                    id="semana1"
+                  />
                   <Label htmlFor="semana1" className="text-sm">
                     Semana 1
                   </Label>
                 </div>
+
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="semana2" id="semana2" />
+                  <CheckboxGroupItem
+                    checked={filtros.semana2}
+                    onCheckedChange={handleChange("semana2")}
+                    id="semana2"
+                  />
                   <Label htmlFor="semana2" className="text-sm">
                     Semana 2
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ambas" id="ambas" />
-                  <Label htmlFor="ambas" className="text-sm">
-                    Ambas
-                  </Label>
-                </div>
-              </RadioGroup>
+              </CheckboxGroup>
             </div>
           </div>
 

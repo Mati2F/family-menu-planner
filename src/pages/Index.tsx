@@ -96,14 +96,7 @@ const Index = () => {
 
           {/* Shopping List Section */}
           <section>
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold text-foreground mb-2">
-                Lista de Compras
-              </h2>
-              <p className="text-muted-foreground">
-                Ingredientes necesarios para tus platos seleccionados
-              </p>
-            </div>
+
             <ShoppingList selectedMeals={selectedMeals} />
           </section>
         </div>

@@ -28,7 +28,7 @@ export const InitialScreen = ({ onSelectMode }: InitialScreenProps) => {
               </div>
               <CardTitle className="text-xl">Programa Predefinido</CardTitle>
               <CardDescription>
-                Obtén una programación completa generada automáticamente
+                <p>Obtén una programación completa</p>
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -39,7 +39,7 @@ export const InitialScreen = ({ onSelectMode }: InitialScreenProps) => {
                 <li>• Perfecto para familias ocupadas</li>
               </ul>
               <Button className="w-full bg-gradient-warm hover:opacity-90" size="lg">
-                Generar Programa
+                Generar Programa con Platos
               </Button>
             </CardContent>
           </Card>
@@ -63,7 +63,7 @@ export const InitialScreen = ({ onSelectMode }: InitialScreenProps) => {
                 <li>• Ideal para gustos específicos</li>
               </ul>
               <Button className="w-full bg-gradient-fresh hover:opacity-90" size="lg">
-                Comenzar Vacío
+                <p>Generar Programa sin Platos</p>
               </Button>
             </CardContent>
           </Card>
