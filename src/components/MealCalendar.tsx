@@ -261,29 +261,32 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                                   <X className="w-3 h-3" />
                                 </Button>
                               </div>
-                              <div className="flex items-center gap-2 pl-1">
+                              <div className="flex items-center gap-2 pl-1 min-h-[26px]">
                                 <label className="text-xs text-muted-foreground">Porciones:</label>
                                 <input
                                   type="number"
                                   min="1"
                                   value={selectedMeal.servings}
                                   onChange={(e) => handleServingsChange(day, mealKey as MealType, parseInt(e.target.value) || 1)}
-                                  className="w-16 px-2 py-1 text-xs border rounded bg-background text-foreground"
+                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
                             </div>
                           ) : (
-                            <Button 
-                              variant="outline"
-                              className="w-full h-auto p-3 text-left justify-start"
-                              onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                            >
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Plus className="w-4 h-4" />
-                                <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
-                              </div>
-                            </Button>
+                            <div className="space-y-2">
+                              <Button 
+                                variant="outline"
+                                className="w-full h-auto p-3 text-left justify-start"
+                                onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                              >
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Plus className="w-4 h-4" />
+                                  <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
+                                </div>
+                              </Button>
+                              <div className="min-h-[26px]"></div>
+                            </div>
                           )}
                         </div>
                       );
@@ -374,29 +377,32 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                                   <X className="w-3 h-3" />
                                 </Button>
                               </div>
-                              <div className="flex items-center gap-2 pl-1">
+                              <div className="flex items-center gap-2 pl-1 min-h-[26px]">
                                 <label className="text-xs text-muted-foreground">Porciones:</label>
                                 <input
                                   type="number"
                                   min="1"
                                   value={selectedMeal.servings}
                                   onChange={(e) => handleServingsChange(day, mealKey as MealType, parseInt(e.target.value) || 1)}
-                                  className="w-16 px-2 py-1 text-xs border rounded bg-background text-foreground"
+                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
                             </div>
                           ) : (
-                            <Button 
-                              variant="outline"
-                              className="w-full h-auto p-3 text-left justify-start"
-                              onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                            >
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Plus className="w-4 h-4" />
-                                <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
-                              </div>
-                            </Button>
+                            <div className="space-y-2">
+                              <Button 
+                                variant="outline"
+                                className="w-full h-auto p-3 text-left justify-start"
+                                onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                              >
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Plus className="w-4 h-4" />
+                                  <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
+                                </div>
+                              </Button>
+                              <div className="min-h-[26px]"></div>
+                            </div>
                           )}
                           </div>
                         );
