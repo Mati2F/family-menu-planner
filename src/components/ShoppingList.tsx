@@ -239,6 +239,84 @@ const normalizeIngredient = (ingredient: string): string => {
   return normalizations[lower] || ingredient;
 };
 
+// Function to scale a quantity by a multiplier
+const scaleQuantity = (quantity: string, multiplier: number): string => {
+  if (multiplier === 1) return quantity;
+  
+  const trimmed = quantity.trim();
+  
+  // Handle special cases
+  if (trimmed === "al gusto") return trimmed;
+  
+  // Handle descriptive quantities
+  const descriptive = trimmed.toLowerCase();
+  if (
+    descriptive.includes("hojas") ||
+    descriptive.includes("ramitas") ||
+    descriptive.includes("manojo") ||
+    /^hojas?$/.test(descriptive) ||
+    /^ramitas?$/.test(descriptive)
+  ) {
+    return trimmed;
+  }
+  
+  // Parse numeric quantities
+  const parseQty = (raw: string): { value: number; unit: string } => {
+    const qty = raw.trim();
+
+    // Mixed number: "1 1/2 unidad(es)"
+    let m = qty.match(/^(\d+)\s+(\d+)\/(\d+)\s*(.*)$/);
+    if (m) {
+      const whole = parseFloat(m[1]);
+      const num = parseFloat(m[2]);
+      const den = parseFloat(m[3]);
+      const unit = (m[4] || "").trim();
+      return { value: whole + num / den, unit };
+    }
+
+    // Simple fraction: "1/2 unidad(es)"
+    m = qty.match(/^(\d+)\/(\d+)\s*(.*)$/);
+    if (m) {
+      const num = parseFloat(m[1]);
+      const den = parseFloat(m[2]);
+      const unit = (m[3] || "").trim();
+      return { value: num / den, unit };
+    }
+
+    // Decimal or integer: "2.5 unidades" o "2 unidades"
+    m = qty.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+    if (m) {
+      const unit = (m[2] || "").trim();
+      return { value: parseFloat(m[1]), unit };
+    }
+
+    return { value: 0, unit: "" };
+  };
+  
+  const { value, unit } = parseQty(trimmed);
+  if (value === 0) return trimmed;
+  
+  const scaledValue = value * multiplier;
+  const EPS = 1e-6;
+  const whole = Math.round(scaledValue);
+  const frac = scaledValue - Math.floor(scaledValue);
+
+  // Exact integer
+  if (Math.abs(scaledValue - whole) < EPS) {
+    return unit ? `${whole} ${unit}` : `${whole}`;
+  }
+
+  // Half increments
+  const wholeDown = Math.floor(scaledValue + EPS);
+  if (Math.abs(frac - 0.5) < EPS) {
+    const result = wholeDown > 0 ? `${wholeDown} 1/2` : `1/2`;
+    return unit ? `${result} ${unit}` : result;
+  }
+
+  // Fallback to one decimal
+  return unit ? `${scaledValue.toFixed(1)} ${unit}` : `${scaledValue.toFixed(1)}`;
+};
+
 // Function to sum quantities numerically
 const sumQuantities = (quantities: string[]): string => {
   // Handle special cases first
@@ -341,9 +419,34 @@ const sumQuantities = (quantities: string[]): string => {
 };
 interface ShoppingListProps {
   selectedMeals: {
-    [key: string]: { breakfast?: string; lunch?: string; dinner?: string };
+    [key: string]: {
+      breakfast?: { name: string; servings: number };
+      lunch?: { name: string; servings: number };
+      dinner?: { name: string; servings: number };
+    };
   };
 }
+
+// Sample dish data to get base servings
+const SAMPLE_DISHES_SERVINGS: { [key: string]: number } = {
+  "Tostadas con Palta": 2,
+  "Huevos Revueltos": 2,
+  "Pancakes": 4,
+  "Avena con Frutas": 2,
+  "Yogurt con Granola": 1,
+  "Pollo al Horno con Papas": 4,
+  "Pasta con Salsa de Tomate": 4,
+  "Ensalada César": 2,
+  "Arroz con Verduras": 4,
+  "Sándwich de Atún": 2,
+  "Sopa de Lentejas": 6,
+  "Salmón a la Plancha": 2,
+  "Pizza Casera": 4,
+  "Ensalada de Quinoa": 3,
+  "Tacos de Pollo": 4,
+  "Sopa de Verduras": 4,
+  "Milanesas con Puré": 4,
+};
 
 export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
@@ -391,15 +494,21 @@ export const ShoppingList = ({ selectedMeals }: ShoppingListProps) => {
     // Si semana2 está desactivada → excluye días que sí tienen " - Semana 2"
     if (!filtros.semana2 && isSemana2) return;
 
-    Object.values(dayMeals).forEach((dish) => {
-      if (dish && DISH_INGREDIENTS[dish]) {
-        Object.entries(DISH_INGREDIENTS[dish]).forEach(
+    Object.values(dayMeals).forEach((meal) => {
+      if (meal && DISH_INGREDIENTS[meal.name]) {
+        const baseServings = SAMPLE_DISHES_SERVINGS[meal.name] || 1;
+        const servingsMultiplier = meal.servings / baseServings;
+
+        Object.entries(DISH_INGREDIENTS[meal.name]).forEach(
           ([ingredient, quantity]) => {
             const normalizedIngredient = normalizeIngredient(ingredient);
             if (!allIngredients[normalizedIngredient]) {
               allIngredients[normalizedIngredient] = [];
             }
-            allIngredients[normalizedIngredient].push(quantity);
+            
+            // Scale the quantity based on servings
+            const scaledQuantity = scaleQuantity(quantity, servingsMultiplier);
+            allIngredients[normalizedIngredient].push(scaledQuantity);
           }
         );
       }

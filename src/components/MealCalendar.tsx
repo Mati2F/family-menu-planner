@@ -66,9 +66,9 @@ type MealType = keyof typeof MEALS;
 
 interface MealData {
   [key: string]: {
-    breakfast?: string;
-    lunch?: string;
-    dinner?: string;
+    breakfast?: { name: string; servings: number };
+    lunch?: { name: string; servings: number };
+    dinner?: { name: string; servings: number };
   };
 }
 
@@ -89,11 +89,15 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
   const handleMealSelect = (dish: string) => {
     if (!selectedSlot) return;
     
+    // Find the dish's default servings
+    const dishData = SAMPLE_DISHES[selectedSlot.meal].find(d => d.name === dish);
+    const defaultServings = dishData?.servings || 2;
+    
     const updatedMeals = {
       ...meals,
       [selectedSlot.day]: {
         ...meals[selectedSlot.day],
-        [selectedSlot.meal]: dish
+        [selectedSlot.meal]: { name: dish, servings: defaultServings }
       }
     };
     
@@ -131,13 +135,29 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
         const mealType = mealKey as MealType;
         const dishes = SAMPLE_DISHES[mealType];
         const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
-        randomMeals[day][mealType] = randomDish.name;
+        randomMeals[day][mealType] = { name: randomDish.name, servings: randomDish.servings };
       });
     });
 
     setMeals(randomMeals);
     onMealsChange(randomMeals);
     setProgress({});
+  };
+
+  const handleServingsChange = (day: string, meal: MealType, servings: number) => {
+    const currentMeal = meals[day]?.[meal];
+    if (!currentMeal) return;
+
+    const updatedMeals = {
+      ...meals,
+      [day]: {
+        ...meals[day],
+        [meal]: { ...currentMeal, servings: Math.max(1, servings) }
+      }
+    };
+
+    setMeals(updatedMeals);
+    onMealsChange(updatedMeals);
   };
 
   const toggleDayProgress = (day: string) => {
@@ -188,7 +208,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                   <div className="space-y-3">
                     {Object.entries(MEALS).map(([mealKey, meal]) => {
                       const MealIcon = meal.icon;
-                      const selectedDish = meals[day]?.[mealKey as MealType];
+                      const selectedMeal = meals[day]?.[mealKey as MealType];
                       
                       return (
                         <div key={mealKey} className="space-y-2">
@@ -201,61 +221,74 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                             </span>
                           </div>
                           
-                          {selectedDish ? (
-                            <div className="relative group">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="secondary"
-                                    className="w-full h-auto p-3 text-left justify-start transition-all"
-                                    onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                                  >
-                                    <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedDish}</span>
-                                  </Button>
-                                </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-sm">
-                                <div className="space-y-1">
-                                  <p className="font-semibold text-sm">Ingredientes:</p>
-                                  {DISH_INGREDIENTS[selectedDish] ? (
-                                    <ul className="text-xs space-y-0.5">
-                                      {Object.entries(DISH_INGREDIENTS[selectedDish]).map(([ingredient, quantity]) => (
-                                        <li key={ingredient}>• {ingredient}: {quantity}</li>
-                                      ))}
-                                    </ul>
-                                  ) : (
-                                    <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
-                                  )}
-                                </div>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveMeal(day, mealKey as MealType);
-                                }}
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
+                          {selectedMeal ? (
+                            <div className="space-y-2">
+                              <div className="relative group">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="secondary"
+                                      className="w-full h-auto p-3 text-left justify-start transition-all"
+                                      onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                                    >
+                                      <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedMeal.name}</span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="right" className="max-w-sm">
+                                    <div className="space-y-1">
+                                      <p className="font-semibold text-sm">Ingredientes:</p>
+                                      {DISH_INGREDIENTS[selectedMeal.name] ? (
+                                        <ul className="text-xs space-y-0.5">
+                                          {Object.entries(DISH_INGREDIENTS[selectedMeal.name]).map(([ingredient, quantity]) => (
+                                            <li key={ingredient}>• {ingredient}: {quantity}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveMeal(day, mealKey as MealType);
+                                  }}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <div className="flex items-center gap-2 pl-1">
+                                <label className="text-xs text-muted-foreground">Porciones:</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={selectedMeal.servings}
+                                  onChange={(e) => handleServingsChange(day, mealKey as MealType, parseInt(e.target.value) || 1)}
+                                  className="w-16 px-2 py-1 text-xs border rounded bg-background text-foreground"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
                             </div>
                           ) : (
-                          <Button 
-                            variant="outline"
-                            className="w-full h-auto p-3 text-left justify-start"
-                            onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                          >
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Plus className="w-4 h-4" />
-                              <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
-                            </div>
-                          </Button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                            <Button 
+                              variant="outline"
+                              className="w-full h-auto p-3 text-left justify-start"
+                              onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                            >
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Plus className="w-4 h-4" />
+                                <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
+                              </div>
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                   </Card>
                 );
               })}
@@ -288,7 +321,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                   <div className="space-y-3">
                     {Object.entries(MEALS).map(([mealKey, meal]) => {
                       const MealIcon = meal.icon;
-                      const selectedDish = meals[day]?.[mealKey as MealType];
+                      const selectedMeal = meals[day]?.[mealKey as MealType];
                       
                       return (
                         <div key={mealKey} className="space-y-2">
@@ -301,57 +334,70 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
                             </span>
                           </div>
                           
-                          {selectedDish ? (
-                            <div className="relative group">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="secondary"
-                                    className="w-full h-auto p-3 text-left justify-start transition-all"
-                                    onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                                  >
-                                    <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedDish}</span>
-                                  </Button>
-                                </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-sm">
-                                <div className="space-y-1">
-                                  <p className="font-semibold text-sm">Ingredientes:</p>
-                                  {DISH_INGREDIENTS[selectedDish] ? (
-                                    <ul className="text-xs space-y-0.5">
-                                      {Object.entries(DISH_INGREDIENTS[selectedDish]).map(([ingredient, quantity]) => (
-                                        <li key={ingredient}>• {ingredient}: {quantity}</li>
-                                      ))}
-                                    </ul>
-                                  ) : (
-                                    <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
-                                  )}
-                                </div>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveMeal(day, mealKey as MealType);
-                                }}
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
+                          {selectedMeal ? (
+                            <div className="space-y-2">
+                              <div className="relative group">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="secondary"
+                                      className="w-full h-auto p-3 text-left justify-start transition-all"
+                                      onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                                    >
+                                      <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>{selectedMeal.name}</span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="right" className="max-w-sm">
+                                    <div className="space-y-1">
+                                      <p className="font-semibold text-sm">Ingredientes:</p>
+                                      {DISH_INGREDIENTS[selectedMeal.name] ? (
+                                        <ul className="text-xs space-y-0.5">
+                                          {Object.entries(DISH_INGREDIENTS[selectedMeal.name]).map(([ingredient, quantity]) => (
+                                            <li key={ingredient}>• {ingredient}: {quantity}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="text-xs text-muted-foreground">Ingredientes no disponibles</p>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="absolute top-1 right-1 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveMeal(day, mealKey as MealType);
+                                  }}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <div className="flex items-center gap-2 pl-1">
+                                <label className="text-xs text-muted-foreground">Porciones:</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={selectedMeal.servings}
+                                  onChange={(e) => handleServingsChange(day, mealKey as MealType, parseInt(e.target.value) || 1)}
+                                  className="w-16 px-2 py-1 text-xs border rounded bg-background text-foreground"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
                             </div>
                           ) : (
-                          <Button 
-                            variant="outline"
-                            className="w-full h-auto p-3 text-left justify-start"
-                            onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
-                          >
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Plus className="w-4 h-4" />
-                              <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
-                            </div>
-                          </Button>
-                            )}
+                            <Button 
+                              variant="outline"
+                              className="w-full h-auto p-3 text-left justify-start"
+                              onClick={() => setSelectedSlot({ day, meal: mealKey as MealType })}
+                            >
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Plus className="w-4 h-4" />
+                                <span className={`text-sm ${isDayCompleted ? 'line-through' : ''}`}>Agregar plato</span>
+                              </div>
+                            </Button>
+                          )}
                           </div>
                         );
                       })}

@@ -6,9 +6,9 @@ import { InitialScreen } from "@/components/InitialScreen";
 
 interface MealData {
   [key: string]: {
-    breakfast?: string;
-    lunch?: string;
-    dinner?: string;
+    breakfast?: { name: string; servings: number };
+    lunch?: { name: string; servings: number };
+    dinner?: { name: string; servings: number };
   };
 }
 
@@ -52,7 +52,7 @@ const generateRandomMealsTwoWeeks = (): MealData => {
       const mealType = mealKey as keyof typeof SAMPLE_DISHES;
       const dishes = SAMPLE_DISHES[mealType];
       const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
-      randomMeals[day][mealType] = randomDish.name;
+      randomMeals[day][mealType] = { name: randomDish.name, servings: randomDish.servings };
     });
   });
 
