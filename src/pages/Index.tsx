@@ -62,12 +62,8 @@ const generateRandomMealsTwoWeeks = (): MealData => {
 const Index = () => {
   const [selectedMeals, setSelectedMeals] = useState<MealData>({});
   const [currentMode, setCurrentMode] = useState<'initial' | 'app'>('initial');
-  const [defaultServings, setDefaultServings] = useState<number>(2);
 
-  const handleModeSelect = (mode: 'manual' | 'random', servings?: number) => {
-    if (servings) {
-      setDefaultServings(servings);
-    }
+  const handleModeSelect = (mode: 'manual' | 'random') => {
     if (mode === 'random') {
       const randomMeals = generateRandomMealsTwoWeeks();
       setSelectedMeals(randomMeals);
@@ -95,11 +91,7 @@ const Index = () => {
                 Selecciona qué preparar cada día de la semana
               </p>
             </div>
-            <MealCalendar 
-              onMealsChange={setSelectedMeals} 
-              initialMeals={selectedMeals}
-              defaultServings={defaultServings}
-            />
+            <MealCalendar onMealsChange={setSelectedMeals} initialMeals={selectedMeals} />
           </section>
 
           {/* Shopping List Section */}

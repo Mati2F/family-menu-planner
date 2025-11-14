@@ -1,16 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Shuffle, Plus } from "lucide-react";
-import { useState } from "react";
 
 interface InitialScreenProps {
-  onSelectMode: (mode: 'manual' | 'random', defaultServings?: number) => void;
+  onSelectMode: (mode: 'manual' | 'random') => void;
 }
 
 export const InitialScreen = ({ onSelectMode }: InitialScreenProps) => {
-  const [defaultServings, setDefaultServings] = useState<number>(2);
   return (
     <div className="min-h-screen bg-gradient-soft flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
@@ -23,37 +19,9 @@ export const InitialScreen = ({ onSelectMode }: InitialScreenProps) => {
           </p>
         </div>
 
-        <div className="mb-6">
-          <Card className="shadow-card">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Label htmlFor="defaultServings" className="text-base whitespace-nowrap">
-                  Porciones por defecto:
-                </Label>
-                <Input
-                  id="defaultServings"
-                  type="number"
-                  min="1"
-                  value={defaultServings}
-                  onChange={(e) => setDefaultServings(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-24 text-center border-2"
-                  style={{
-                    MozAppearance: 'textfield',
-                    WebkitAppearance: 'none',
-                    appearance: 'none'
-                  }}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Esta será la cantidad inicial de porciones para cada plato
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="shadow-card hover:shadow-soft transition-all duration-300 cursor-pointer" 
-                onClick={() => onSelectMode('random', defaultServings)}>
+                onClick={() => onSelectMode('random')}>
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 p-4 bg-gradient-warm rounded-full w-16 h-16 flex items-center justify-center">
                 <Shuffle className="w-8 h-8 text-white" />
@@ -77,7 +45,7 @@ export const InitialScreen = ({ onSelectMode }: InitialScreenProps) => {
           </Card>
 
           <Card className="shadow-card hover:shadow-soft transition-all duration-300 cursor-pointer"
-                onClick={() => onSelectMode('manual', defaultServings)}>
+                onClick={() => onSelectMode('manual')}>
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 p-4 bg-gradient-fresh rounded-full w-16 h-16 flex items-center justify-center">
                 <Plus className="w-8 h-8 text-white" />
