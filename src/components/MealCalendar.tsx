@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChefHat, Coffee, Sun, Moon, Plus, X, Shuffle, Check } from "lucide-react";
 import { MealSelector } from "./MealSelector";
-import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const WEEK_1_DAYS = DAYS.map(day => day);
@@ -79,9 +80,11 @@ interface ProgressData {
 interface MealCalendarProps {
   onMealsChange: (meals: MealData) => void;
   initialMeals?: MealData;
+  defaultServings?: number;
 }
 
-export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarProps) => {
+export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings = 2 }: MealCalendarProps) => {
+  const [defaultServingsState, setDefaultServingsState] = useState<number>(defaultServings);
   const [meals, setMeals] = useState<MealData>(initialMeals);
   const [selectedSlot, setSelectedSlot] = useState<{ day: string; meal: MealType } | null>(null);
   const [progress, setProgress] = useState<ProgressData>({});
@@ -125,14 +128,14 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
     }
   };
 
-  const handleGenerateRandom = () => {
+  const generateRandomMeals = () => {
     const randomMeals: MealData = {};
     const allDays = [...WEEK_1_DAYS, ...WEEK_2_DAYS];
-    
+
     allDays.forEach(day => {
       randomMeals[day] = {};
-      Object.keys(MEALS).forEach(mealKey => {
-        const mealType = mealKey as MealType;
+      Object.keys(SAMPLE_DISHES).forEach(mealKey => {
+        const mealType = mealKey as keyof typeof SAMPLE_DISHES;
         const dishes = SAMPLE_DISHES[mealType];
         const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
         randomMeals[day][mealType] = { name: randomDish.name, servings: randomDish.servings };
@@ -140,8 +143,6 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
     });
 
     setMeals(randomMeals);
-    onMealsChange(randomMeals);
-    setProgress({});
   };
 
   const handleServingsChange = (day: string, meal: MealType, servings: number) => {
@@ -171,14 +172,39 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {} }: MealCalendarP
   return (
     <TooltipProvider>
       <div className="mb-6">
-        <Button 
-          onClick={handleGenerateRandom}
-          className="bg-gradient-warm hover:opacity-90"
-          size="lg"
-        >
-          <Shuffle className="w-4 h-4 mr-2" />
-          Generar Programa Aleatorio
-        </Button>
+        <Card className="shadow-card">
+          <CardContent className="pt-6">
+            <div className="flex  sm:flex-row items-center gap-4">
+              <Label htmlFor="defaultServings" className="text-base whitespace-nowrap">
+                Porciones por defecto:
+              </Label>
+              <Input
+                id="defaultServings"
+                type="number"
+                min="1"
+                value={defaultServingsState}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setDefaultServingsState(Math.max(1, parseInt(e.target.value || '0', 10) || 1))
+                }
+                className="w-24 text-center border-2"
+                style={{
+                  MozAppearance: 'textfield',
+                  WebkitAppearance: 'none',
+                  appearance: 'none'
+                }}
+              />
+              <p className="text-sm text-muted-foreground">
+                Esta será la cantidad inicial de porciones para cada plato
+              </p>
+
+              <Button onClick={generateRandomMeals} variant="outline" className="gap-2 ml-auto bg-[#F06833] hover:bg-[#F4956E] hover:text-white text-white">
+                <Shuffle className="w-4 h-4" />
+                Generar Programa Aleatorio
+              </Button>
+
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-6">
