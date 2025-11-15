@@ -1,4 +1,5 @@
-import { ChefHat, Calendar, Users } from "lucide-react";
+import { ChefHat } from "lucide-react";
+import { EditMealDialog } from "./EditMealDialog";
 
 export const AppHeader = () => {
   return (
@@ -18,6 +19,7 @@ export const AppHeader = () => {
               </p>
             </div>
           </div>
+          <EditMealDialog />
         </div>
       </div>
     </header>
