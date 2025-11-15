@@ -318,8 +318,8 @@ export const EditMealDialog = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Edit className="w-4 h-4" />
+        <Button variant="outline" className="gap-2 ml-auto bg-[#F06833] hover:bg-[#F4956E] hover:text-white text-white">
+          <Edit className="w-4 h-4"  />
           Modificar Plato
         </Button>
       </DialogTrigger>
@@ -480,9 +480,9 @@ export const EditMealDialog = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemoveIngredient(index)}
-                          className="text-destructive hover:text-destructive mt-6"
+                          className="text-destructive hover:text-destructive mt-6 border-2 border-border"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 " />
                         </Button>
                       )}
                     </div>
