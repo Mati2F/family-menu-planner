@@ -391,7 +391,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
                                     handleServingsChange(day, mealKey as MealType, parsed);
                                     setServingsInputValue(day, mealKey as MealType, parsed.toString());
                                   }}
-                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded"
+                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
@@ -539,7 +539,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
                                     handleServingsChange(day, mealKey as MealType, parsed);
                                     setServingsInputValue(day, mealKey as MealType, parsed.toString());
                                   }}
-                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded"
+                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
