@@ -4,9 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Edit, Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const ALL_DISHES = [
   // Desayunos
@@ -250,7 +253,7 @@ const AVAILABLE_INGREDIENTS = [
   "Queso mozzarella", "Pepperoni", "Orégano", "Quinoa", "Tomate cherry", "Pepino",
   "Queso feta", "Tortillas", "Queso rallado", "Crema agria", "Zapallo", "Apio",
   "Carne para milanesa", "Pan rallado"
-];
+].sort((a, b) => a.localeCompare(b, 'es'));
 
 interface Ingredient {
   name: string;
@@ -265,6 +268,7 @@ export const EditMealDialog = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([
     { name: "", quantity: "" }
   ]);
+  const [openPopovers, setOpenPopovers] = useState<Record<number, boolean>>({});
   const { toast } = useToast();
 
   const handleDishSelect = (dishName: string) => {
@@ -413,21 +417,50 @@ export const EditMealDialog = () => {
                         <Label htmlFor={`ingredient-name-${index}`} className="text-xs text-muted-foreground">
                           Ingrediente
                         </Label>
-                        <Select
-                          value={ingredient.name}
-                          onValueChange={(value) => handleIngredientChange(index, 'name', value)}
+                        <Popover 
+                          open={openPopovers[index]} 
+                          onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [index]: open }))}
                         >
-                          <SelectTrigger id={`ingredient-name-${index}`}>
-                            <SelectValue placeholder="Seleccionar ingrediente" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            {AVAILABLE_INGREDIENTS.map((ing) => (
-                              <SelectItem key={ing} value={ing}>
-                                {ing}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openPopovers[index]}
+                              className="w-full justify-between"
+                            >
+                              {ingredient.name || "Seleccionar ingrediente"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar ingrediente..." />
+                              <CommandList>
+                                <CommandEmpty>No se encontró el ingrediente.</CommandEmpty>
+                                <CommandGroup>
+                                  {AVAILABLE_INGREDIENTS.map((ing) => (
+                                    <CommandItem
+                                      key={ing}
+                                      value={ing}
+                                      onSelect={() => {
+                                        handleIngredientChange(index, 'name', ing);
+                                        setOpenPopovers(prev => ({ ...prev, [index]: false }));
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          ingredient.name === ing ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      {ing}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div className="w-32 space-y-1">
                         <Label htmlFor={`ingredient-quantity-${index}`} className="text-xs text-muted-foreground">
