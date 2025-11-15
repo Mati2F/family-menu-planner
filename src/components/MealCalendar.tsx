@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChefHat, Coffee, Sun, Moon, Plus, X, Shuffle, Check } from "lucide-react";
 import { MealSelector } from "./MealSelector";
@@ -84,10 +84,17 @@ interface MealCalendarProps {
 }
 
 export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings = 2 }: MealCalendarProps) => {
-  const [defaultServingsState, setDefaultServingsState] = useState<number>(defaultServings);
+  const [defaultServingsState, setDefaultServingsState] = useState(2);
   const [meals, setMeals] = useState<MealData>(initialMeals);
   const [selectedSlot, setSelectedSlot] = useState<{ day: string; meal: MealType } | null>(null);
   const [progress, setProgress] = useState<ProgressData>({});
+  const [inputValue, setInputValue] = useState<string>(defaultServingsState.toString());
+
+  const [servingsInputs, setServingsInputs] = useState<
+    { [day: string]: { [meal in MealType]?: string } }
+  >({});
+
+
 
   const handleMealSelect = (dish: string) => {
     if (!selectedSlot) return;
@@ -108,6 +115,32 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
     onMealsChange(updatedMeals);
     setSelectedSlot(null);
   };
+
+  useEffect(() => {
+    // cada vez que cambia defaultServingsState → actualizar todos los inputs
+    setServingsInputs(prev => {
+      const updated = { ...prev };
+
+      for (const day in meals) {
+        for (const mealKey in meals[day]) {
+          const meal = mealKey as MealType;
+
+          updated[day] = updated[day] || {};
+          updated[day][meal] = defaultServingsState.toString();
+        }
+      }
+
+      return updated;
+    });
+
+    // actualizar estado real de meals también
+    for (const day in meals) {
+      for (const mealKey in meals[day]) {
+        const meal = mealKey as MealType;
+        handleServingsChange(day, meal, defaultServingsState);
+      }
+    }
+  }, [defaultServingsState]);
 
   const handleRemoveMeal = (day: string, meal: MealType) => {
     const updatedMeals = { ...meals };
@@ -169,6 +202,18 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
     setProgress(updatedProgress);
   };
 
+  const setServingsInputValue = (day: string, meal: MealType, value: string) => {
+    setServingsInputs(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [meal]: value
+      }
+    }));
+  };
+
+
+
   return (
     <TooltipProvider>
       <div className="mb-6">
@@ -182,16 +227,36 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
                 id="defaultServings"
                 type="number"
                 min="1"
-                value={defaultServingsState}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setDefaultServingsState(Math.max(1, parseInt(e.target.value || '0', 10) || 1))
-                }
-                className="w-24 text-center border-2"
-                style={{
-                  MozAppearance: 'textfield',
-                  WebkitAppearance: 'none',
-                  appearance: 'none'
+                value={inputValue}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  // Permitir borrar
+                  if (value === "") {
+                    setInputValue("");
+                    return;
+                  }
+
+                  // Validar número
+                  const parsed = parseInt(value, 10);
+                  if (!isNaN(parsed)) {
+                    setInputValue(value);
+                  }
                 }}
+                onBlur={() => {
+                  // Si queda vacío al salir, usar valor por defecto 2
+                  if (inputValue === "") {
+                    setDefaultServingsState(2);
+                    setInputValue("2");
+                    return;
+                  }
+
+                  // Actualizar tu estado real (int)
+                  const parsed = Math.max(1, parseInt(inputValue, 10));
+                  setDefaultServingsState(parsed);
+                  setInputValue(parsed.toString());
+                }}
+                className="w-24 text-center border-2"
               />
               <p className="text-sm text-muted-foreground">
                 Esta será la cantidad inicial de porciones para cada plato
@@ -292,9 +357,41 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
                                 <input
                                   type="number"
                                   min="1"
-                                  value={selectedMeal.servings}
-                                  onChange={(e) => handleServingsChange(day, mealKey as MealType, parseInt(e.target.value) || 1)}
-                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  value={
+                                    servingsInputs[day]?.[mealKey as MealType] ??
+                                    defaultServingsState.toString()
+                                  }
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    // Permitir borrar por completo
+                                    if (value === "") {
+                                      setServingsInputValue(day, mealKey as MealType, "");
+                                      return;
+                                    }
+
+                                    // permitir solo números válidos
+                                    if (!isNaN(parseInt(value))) {
+                                      setServingsInputValue(day, mealKey as MealType, value);
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    const raw = servingsInputs[day]?.[mealKey as MealType];
+
+                                    // Si se dejó vacío → volver al default
+                                    if (!raw || raw.trim() === "") {
+                                      const val = defaultServingsState.toString();
+                                      setServingsInputValue(day, mealKey as MealType, val);
+                                      handleServingsChange(day, mealKey as MealType, defaultServingsState);
+                                      return;
+                                    }
+
+                                    // Si tiene número válido
+                                    const parsed = Math.max(1, parseInt(raw, 10));
+                                    handleServingsChange(day, mealKey as MealType, parsed);
+                                    setServingsInputValue(day, mealKey as MealType, parsed.toString());
+                                  }}
+                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
@@ -408,9 +505,41 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
                                 <input
                                   type="number"
                                   min="1"
-                                  value={selectedMeal.servings}
-                                  onChange={(e) => handleServingsChange(day, mealKey as MealType, parseInt(e.target.value) || 1)}
-                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  value={
+                                    servingsInputs[day]?.[mealKey as MealType] ??
+                                    defaultServingsState.toString()
+                                  }
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    // Permitir borrar por completo
+                                    if (value === "") {
+                                      setServingsInputValue(day, mealKey as MealType, "");
+                                      return;
+                                    }
+
+                                    // permitir solo números válidos
+                                    if (!isNaN(parseInt(value))) {
+                                      setServingsInputValue(day, mealKey as MealType, value);
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    const raw = servingsInputs[day]?.[mealKey as MealType];
+
+                                    // Si se dejó vacío → volver al default
+                                    if (!raw || raw.trim() === "") {
+                                      const val = defaultServingsState.toString();
+                                      setServingsInputValue(day, mealKey as MealType, val);
+                                      handleServingsChange(day, mealKey as MealType, defaultServingsState);
+                                      return;
+                                    }
+
+                                    // Si tiene número válido
+                                    const parsed = Math.max(1, parseInt(raw, 10));
+                                    handleServingsChange(day, mealKey as MealType, parsed);
+                                    setServingsInputValue(day, mealKey as MealType, parsed.toString());
+                                  }}
+                                  className="w-16 px-2 py-1 text-xs border-2 border-border rounded"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
