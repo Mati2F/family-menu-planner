@@ -275,7 +275,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
       <div className="space-y-6">
         {/* Semana 1 */}
         <div>
-          <h2 className="text-lg font-semibold mb-4 text-foreground">Semana 1</h2>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Semana del 17/11/25</h2>
           <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             {WEEK_1_DAYS.map((day) => {
               const isDayCompleted = progress[day];
@@ -423,7 +423,7 @@ export const MealCalendar = ({ onMealsChange, initialMeals = {}, defaultServings
 
         {/* Semana 2 */}
         <div>
-          <h2 className="text-lg font-semibold mb-4 text-foreground">Semana 2</h2>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Semana del 24/11/25</h2>
           <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             {WEEK_2_DAYS.map((day) => {
               const isDayCompleted = progress[day];
