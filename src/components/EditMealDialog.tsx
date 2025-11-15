@@ -10,25 +10,246 @@ import { useToast } from "@/hooks/use-toast";
 
 const ALL_DISHES = [
   // Desayunos
-  { name: "Tostadas con Palta", type: "breakfast", time: "10 min", servings: 2 },
-  { name: "Huevos Revueltos", type: "breakfast", time: "15 min", servings: 2 },
-  { name: "Pancakes", type: "breakfast", time: "20 min", servings: 4 },
-  { name: "Avena con Frutas", type: "breakfast", time: "5 min", servings: 2 },
-  { name: "Yogurt con Granola", type: "breakfast", time: "5 min", servings: 1 },
+  { 
+    name: "Tostadas con Palta", 
+    type: "breakfast", 
+    time: "10 min", 
+    servings: 2,
+    ingredients: [
+      { name: "Pan integral", quantity: "4 rebanadas" },
+      { name: "Palta", quantity: "1 unidad" },
+      { name: "Sal", quantity: "al gusto" },
+      { name: "Limón", quantity: "1/2 unidad" }
+    ]
+  },
+  { 
+    name: "Huevos Revueltos", 
+    type: "breakfast", 
+    time: "15 min", 
+    servings: 2,
+    ingredients: [
+      { name: "Huevos", quantity: "4 unidades" },
+      { name: "Leche", quantity: "50ml" },
+      { name: "Mantequilla", quantity: "20g" },
+      { name: "Sal", quantity: "al gusto" }
+    ]
+  },
+  { 
+    name: "Pancakes", 
+    type: "breakfast", 
+    time: "20 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Harina", quantity: "200g" },
+      { name: "Huevos", quantity: "2 unidades" },
+      { name: "Leche", quantity: "250ml" },
+      { name: "Azúcar", quantity: "2 cucharadas" },
+      { name: "Polvo de hornear", quantity: "1 cucharadita" }
+    ]
+  },
+  { 
+    name: "Avena con Frutas", 
+    type: "breakfast", 
+    time: "5 min", 
+    servings: 2,
+    ingredients: [
+      { name: "Avena", quantity: "100g" },
+      { name: "Leche", quantity: "300ml" },
+      { name: "Banana", quantity: "1 unidad" },
+      { name: "Fresas", quantity: "100g" },
+      { name: "Miel", quantity: "2 cucharadas" }
+    ]
+  },
+  { 
+    name: "Yogurt con Granola", 
+    type: "breakfast", 
+    time: "5 min", 
+    servings: 1,
+    ingredients: [
+      { name: "Yogurt natural", quantity: "200g" },
+      { name: "Granola", quantity: "50g" },
+      { name: "Arándanos", quantity: "30g" },
+      { name: "Miel", quantity: "1 cucharada" }
+    ]
+  },
   // Almuerzos
-  { name: "Pollo al Horno con Papas", type: "lunch", time: "45 min", servings: 4 },
-  { name: "Pasta con Salsa de Tomate", type: "lunch", time: "25 min", servings: 4 },
-  { name: "Ensalada César", type: "lunch", time: "15 min", servings: 2 },
-  { name: "Arroz con Verduras", type: "lunch", time: "30 min", servings: 4 },
-  { name: "Sándwich de Atún", type: "lunch", time: "10 min", servings: 2 },
-  { name: "Sopa de Lentejas", type: "lunch", time: "40 min", servings: 6 },
+  { 
+    name: "Pollo al Horno con Papas", 
+    type: "lunch", 
+    time: "45 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Pechuga de pollo", quantity: "800g" },
+      { name: "Papas", quantity: "600g" },
+      { name: "Aceite de oliva", quantity: "3 cucharadas" },
+      { name: "Ajo", quantity: "3 dientes" },
+      { name: "Romero", quantity: "al gusto" },
+      { name: "Sal y pimienta", quantity: "al gusto" }
+    ]
+  },
+  { 
+    name: "Pasta con Salsa de Tomate", 
+    type: "lunch", 
+    time: "25 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Pasta", quantity: "400g" },
+      { name: "Tomates", quantity: "500g" },
+      { name: "Cebolla", quantity: "1 unidad" },
+      { name: "Ajo", quantity: "2 dientes" },
+      { name: "Albahaca", quantity: "al gusto" },
+      { name: "Aceite de oliva", quantity: "2 cucharadas" }
+    ]
+  },
+  { 
+    name: "Ensalada César", 
+    type: "lunch", 
+    time: "15 min", 
+    servings: 2,
+    ingredients: [
+      { name: "Lechuga romana", quantity: "1 unidad" },
+      { name: "Pechuga de pollo", quantity: "200g" },
+      { name: "Pan", quantity: "100g" },
+      { name: "Queso parmesano", quantity: "50g" },
+      { name: "Salsa César", quantity: "100ml" }
+    ]
+  },
+  { 
+    name: "Arroz con Verduras", 
+    type: "lunch", 
+    time: "30 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Arroz", quantity: "300g" },
+      { name: "Zanahoria", quantity: "2 unidades" },
+      { name: "Arvejas", quantity: "150g" },
+      { name: "Pimiento", quantity: "1 unidad" },
+      { name: "Cebolla", quantity: "1 unidad" },
+      { name: "Salsa de soja", quantity: "2 cucharadas" }
+    ]
+  },
+  { 
+    name: "Sándwich de Atún", 
+    type: "lunch", 
+    time: "10 min", 
+    servings: 2,
+    ingredients: [
+      { name: "Pan", quantity: "4 rebanadas" },
+      { name: "Atún en lata", quantity: "200g" },
+      { name: "Mayonesa", quantity: "2 cucharadas" },
+      { name: "Lechuga", quantity: "4 hojas" },
+      { name: "Tomate", quantity: "1 unidad" }
+    ]
+  },
+  { 
+    name: "Sopa de Lentejas", 
+    type: "lunch", 
+    time: "40 min", 
+    servings: 6,
+    ingredients: [
+      { name: "Lentejas", quantity: "300g" },
+      { name: "Zanahoria", quantity: "2 unidades" },
+      { name: "Cebolla", quantity: "1 unidad" },
+      { name: "Chorizo", quantity: "200g" },
+      { name: "Caldo de verduras", quantity: "1.5 litros" },
+      { name: "Pimentón", quantity: "1 cucharadita" }
+    ]
+  },
   // Cenas
-  { name: "Salmón a la Plancha", type: "dinner", time: "20 min", servings: 2 },
-  { name: "Pizza Casera", type: "dinner", time: "35 min", servings: 4 },
-  { name: "Ensalada de Quinoa", type: "dinner", time: "15 min", servings: 3 },
-  { name: "Tacos de Pollo", type: "dinner", time: "25 min", servings: 4 },
-  { name: "Sopa de Verduras", type: "dinner", time: "30 min", servings: 4 },
-  { name: "Milanesas con Puré", type: "dinner", time: "35 min", servings: 4 },
+  { 
+    name: "Salmón a la Plancha", 
+    type: "dinner", 
+    time: "20 min", 
+    servings: 2,
+    ingredients: [
+      { name: "Filete de salmón", quantity: "400g" },
+      { name: "Limón", quantity: "1 unidad" },
+      { name: "Aceite de oliva", quantity: "2 cucharadas" },
+      { name: "Sal y pimienta", quantity: "al gusto" },
+      { name: "Espárragos", quantity: "200g" }
+    ]
+  },
+  { 
+    name: "Pizza Casera", 
+    type: "dinner", 
+    time: "35 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Masa de pizza", quantity: "1 unidad" },
+      { name: "Salsa de tomate", quantity: "200ml" },
+      { name: "Queso mozzarella", quantity: "250g" },
+      { name: "Pepperoni", quantity: "100g" },
+      { name: "Orégano", quantity: "al gusto" }
+    ]
+  },
+  { 
+    name: "Ensalada de Quinoa", 
+    type: "dinner", 
+    time: "15 min", 
+    servings: 3,
+    ingredients: [
+      { name: "Quinoa", quantity: "200g" },
+      { name: "Tomate cherry", quantity: "150g" },
+      { name: "Pepino", quantity: "1 unidad" },
+      { name: "Queso feta", quantity: "100g" },
+      { name: "Aceite de oliva", quantity: "3 cucharadas" }
+    ]
+  },
+  { 
+    name: "Tacos de Pollo", 
+    type: "dinner", 
+    time: "25 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Tortillas", quantity: "8 unidades" },
+      { name: "Pechuga de pollo", quantity: "500g" },
+      { name: "Lechuga", quantity: "1 unidad" },
+      { name: "Tomate", quantity: "2 unidades" },
+      { name: "Queso rallado", quantity: "100g" },
+      { name: "Crema agria", quantity: "100ml" }
+    ]
+  },
+  { 
+    name: "Sopa de Verduras", 
+    type: "dinner", 
+    time: "30 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Zanahoria", quantity: "2 unidades" },
+      { name: "Zapallo", quantity: "300g" },
+      { name: "Apio", quantity: "2 tallos" },
+      { name: "Cebolla", quantity: "1 unidad" },
+      { name: "Caldo de verduras", quantity: "1 litro" }
+    ]
+  },
+  { 
+    name: "Milanesas con Puré", 
+    type: "dinner", 
+    time: "35 min", 
+    servings: 4,
+    ingredients: [
+      { name: "Carne para milanesa", quantity: "600g" },
+      { name: "Pan rallado", quantity: "150g" },
+      { name: "Huevos", quantity: "2 unidades" },
+      { name: "Papas", quantity: "800g" },
+      { name: "Leche", quantity: "100ml" },
+      { name: "Mantequilla", quantity: "50g" }
+    ]
+  },
+];
+
+const AVAILABLE_INGREDIENTS = [
+  "Pan integral", "Palta", "Sal", "Limón", "Huevos", "Leche", "Mantequilla",
+  "Harina", "Azúcar", "Polvo de hornear", "Avena", "Banana", "Fresas", "Miel",
+  "Yogurt natural", "Granola", "Arándanos", "Pechuga de pollo", "Papas",
+  "Aceite de oliva", "Ajo", "Romero", "Pimienta", "Pasta", "Tomates", "Cebolla",
+  "Albahaca", "Lechuga romana", "Queso parmesano", "Salsa César", "Arroz",
+  "Zanahoria", "Arvejas", "Pimiento", "Salsa de soja", "Atún en lata", "Mayonesa",
+  "Lechuga", "Tomate", "Lentejas", "Chorizo", "Caldo de verduras", "Pimentón",
+  "Filete de salmón", "Espárragos", "Masa de pizza", "Salsa de tomate",
+  "Queso mozzarella", "Pepperoni", "Orégano", "Quinoa", "Tomate cherry", "Pepino",
+  "Queso feta", "Tortillas", "Queso rallado", "Crema agria", "Zapallo", "Apio",
+  "Carne para milanesa", "Pan rallado"
 ];
 
 interface Ingredient {
@@ -52,11 +273,8 @@ export const EditMealDialog = () => {
       setSelectedDish(dishName);
       setTime(dish.time);
       setServings(dish.servings.toString());
-      // Set some example ingredients
-      setIngredients([
-        { name: "Ingrediente 1", quantity: "200g" },
-        { name: "Ingrediente 2", quantity: "1 unidad" },
-      ]);
+      // Set actual ingredients from the dish
+      setIngredients(dish.ingredients || [{ name: "", quantity: "" }]);
     }
   };
 
@@ -190,20 +408,36 @@ export const EditMealDialog = () => {
                 
                 <div className="space-y-3">
                   {ingredients.map((ingredient, index) => (
-                    <div key={index} className="flex gap-2">
-                      <div className="flex-1">
-                        <Input
+                    <div key={index} className="flex gap-2 items-start">
+                      <div className="flex-1 space-y-1">
+                        <Label htmlFor={`ingredient-name-${index}`} className="text-xs text-muted-foreground">
+                          Ingrediente
+                        </Label>
+                        <Select
                           value={ingredient.name}
-                          onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                          placeholder="Nombre del ingrediente"
-                          required
-                        />
+                          onValueChange={(value) => handleIngredientChange(index, 'name', value)}
+                        >
+                          <SelectTrigger id={`ingredient-name-${index}`}>
+                            <SelectValue placeholder="Seleccionar ingrediente" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[200px]">
+                            {AVAILABLE_INGREDIENTS.map((ing) => (
+                              <SelectItem key={ing} value={ing}>
+                                {ing}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="w-32">
+                      <div className="w-32 space-y-1">
+                        <Label htmlFor={`ingredient-quantity-${index}`} className="text-xs text-muted-foreground">
+                          Cantidad
+                        </Label>
                         <Input
+                          id={`ingredient-quantity-${index}`}
                           value={ingredient.quantity}
                           onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
-                          placeholder="Cantidad"
+                          placeholder="Ej: 200g"
                           required
                         />
                       </div>
@@ -213,7 +447,7 @@ export const EditMealDialog = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemoveIngredient(index)}
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive mt-6"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
